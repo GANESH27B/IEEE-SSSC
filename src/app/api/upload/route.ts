@@ -1,12 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function POST(request: NextRequest) {
     try {
@@ -17,21 +9,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'No file uploaded' }, { status: 400 });
         }
 
-        // Convert file to base64
+        // Check file size (limit to 5MB for database storage)
+        if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json({ success: false, error: 'File too large. Maximum 5MB allowed.' }, { status: 400 });
+        }
+
+        // Convert file to base64 data URL (can be stored directly in MongoDB)
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const base64 = buffer.toString('base64');
-        const dataUri = `data:${file.type};base64,${base64}`;
+        const dataUrl = `data:${file.type};base64,${base64}`;
 
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(dataUri, {
-            folder: 'ieee-sscs',
-            resource_type: 'auto',
-        });
-
+        // Return the base64 data URL - this can be stored in MongoDB and used as image src
         return NextResponse.json({
             success: true,
-            url: result.secure_url
+            url: dataUrl
         }, { status: 200 });
     } catch (error) {
         console.error('Upload error:', error);

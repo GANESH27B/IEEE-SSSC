@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
         hostname: "api.dicebear.com",
       },
     ],
+    dangerouslyAllowSVG: true,
+    unoptimized: true, // Required for data URL images
   },
 };
 
