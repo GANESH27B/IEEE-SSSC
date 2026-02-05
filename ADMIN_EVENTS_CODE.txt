@@ -1,0 +1,293 @@
+// Add these to your admin dashboard state (around line 29):
+const [workshops, setWorkshops] = useState<any[]>([]);
+const [sessions, setSessions] = useState<any[]>([]);
+const [lectures, setLectures] = useState<any[]>([]);
+
+// Add these to form states (around line 39):
+const [isAddingWorkshop, setIsAddingWorkshop] = useState(false);
+const [isAddingSession, setIsAddingSession] = useState(false);
+const [isAddingLecture, setIsAddingLecture] = useState(false);
+const [editingWorkshopId, setEditingWorkshopId] = useState<string | null>(null);
+const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+const [editingLectureId, setEditingLectureId] = useState<string | null>(null);
+
+// Add these form states (after userForm around line 66):
+const [workshopForm, setWorkshopForm] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    instructor: "",
+    seats: 0,
+    level: "Beginner",
+    duration: "",
+    topics: [] as string[],
+    image: ""
+});
+
+const [sessionForm, setSessionForm] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    mode: "Online",
+    host: "",
+    participants: 0,
+    type: "Workshop",
+    tools: [] as string[],
+    image: ""
+});
+
+const [lectureForm, setLectureForm] = useState({
+    title: "",
+    speaker: "",
+    designation: "",
+    company: "",
+    bio: "",
+    date: "",
+    time: "",
+    location: "",
+    attendees: 0,
+    topics: [] as string[],
+    linkedin: "",
+    website: "",
+    image: "",
+    type: "Industry Expert"
+});
+
+// Add these fetch functions (after fetchUsers around line 110):
+const fetchWorkshops = async () => {
+    try {
+        const res = await fetch('/api/workshops');
+        const data = await res.json();
+        if (data.success) setWorkshops(data.data);
+    } catch (error) {
+        console.error('Failed to fetch workshops:', error);
+    }
+};
+
+const fetchSessions = async () => {
+    try {
+        const res = await fetch('/api/sessions');
+        const data = await res.json();
+        if (data.success) setSessions(data.data);
+    } catch (error) {
+        console.error('Failed to fetch sessions:', error);
+    }
+};
+
+const fetchLectures = async () => {
+    try {
+        const res = await fetch('/api/lectures');
+        const data = await res.json();
+        if (data.success) setLectures(data.data);
+    } catch (error) {
+        console.error('Failed to fetch lectures:', error);
+    }
+};
+
+// Update fetchAllData function (around line 79):
+const fetchAllData = () => {
+    fetchGalleryItems();
+    fetchTeamMembers();
+    fetchUsers();
+    fetchWorkshops();
+    fetchSessions();
+    fetchLectures();
+};
+
+// Add these handler functions (after user handlers):
+
+// WORKSHOP HANDLERS
+const handleAddWorkshop = async () => {
+    try {
+        const res = await fetch('/api/workshops', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(workshopForm)
+        });
+        if (res.ok) {
+            alert('Workshop added successfully!');
+            setIsAddingWorkshop(false);
+            setWorkshopForm({
+                title: "", description: "", date: "", time: "", location: "",
+                instructor: "", seats: 0, level: "Beginner", duration: "",
+                topics: [], image: ""
+            });
+            fetchWorkshops();
+        }
+    } catch (error) {
+        alert('Failed to add workshop');
+    }
+};
+
+const handleEditWorkshop = (workshop: any) => {
+    setEditingWorkshopId(workshop._id);
+    setWorkshopForm(workshop);
+};
+
+const handleUpdateWorkshop = async () => {
+    try {
+        const res = await fetch(`/api/workshops/${editingWorkshopId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(workshopForm)
+        });
+        if (res.ok) {
+            alert('Workshop updated successfully!');
+            setEditingWorkshopId(null);
+            setWorkshopForm({
+                title: "", description: "", date: "", time: "", location: "",
+                instructor: "", seats: 0, level: "Beginner", duration: "",
+                topics: [], image: ""
+            });
+            fetchWorkshops();
+        }
+    } catch (error) {
+        alert('Failed to update workshop');
+    }
+};
+
+const handleDeleteWorkshop = async (id: string) => {
+    if (confirm('Are you sure you want to delete this workshop?')) {
+        try {
+            const res = await fetch(`/api/workshops/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert('Workshop deleted successfully!');
+                fetchWorkshops();
+            }
+        } catch (error) {
+            alert('Failed to delete workshop');
+        }
+    }
+};
+
+// SESSION HANDLERS
+const handleAddSession = async () => {
+    try {
+        const res = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sessionForm)
+        });
+        if (res.ok) {
+            alert('Session added successfully!');
+            setIsAddingSession(false);
+            setSessionForm({
+                title: "", description: "", date: "", time: "", location: "",
+                mode: "Online", host: "", participants: 0, type: "Workshop",
+                tools: [], image: ""
+            });
+            fetchSessions();
+        }
+    } catch (error) {
+        alert('Failed to add session');
+    }
+};
+
+const handleEditSession = (session: any) => {
+    setEditingSessionId(session._id);
+    setSessionForm(session);
+};
+
+const handleUpdateSession = async () => {
+    try {
+        const res = await fetch(`/api/sessions/${editingSessionId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sessionForm)
+        });
+        if (res.ok) {
+            alert('Session updated successfully!');
+            setEditingSessionId(null);
+            setSessionForm({
+                title: "", description: "", date: "", time: "", location: "",
+                mode: "Online", host: "", participants: 0, type: "Workshop",
+                tools: [], image: ""
+            });
+            fetchSessions();
+        }
+    } catch (error) {
+        alert('Failed to update session');
+    }
+};
+
+const handleDeleteSession = async (id: string) => {
+    if (confirm('Are you sure you want to delete this session?')) {
+        try {
+            const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert('Session deleted successfully!');
+                fetchSessions();
+            }
+        } catch (error) {
+            alert('Failed to delete session');
+        }
+    }
+};
+
+// LECTURE HANDLERS
+const handleAddLecture = async () => {
+    try {
+        const res = await fetch('/api/lectures', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(lectureForm)
+        });
+        if (res.ok) {
+            alert('Lecture added successfully!');
+            setIsAddingLecture(false);
+            setLectureForm({
+                title: "", speaker: "", designation: "", company: "", bio: "",
+                date: "", time: "", location: "", attendees: 0, topics: [],
+                linkedin: "", website: "", image: "", type: "Industry Expert"
+            });
+            fetchLectures();
+        }
+    } catch (error) {
+        alert('Failed to add lecture');
+    }
+};
+
+const handleEditLecture = (lecture: any) => {
+    setEditingLectureId(lecture._id);
+    setLectureForm(lecture);
+};
+
+const handleUpdateLecture = async () => {
+    try {
+        const res = await fetch(`/api/lectures/${editingLectureId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(lectureForm)
+        });
+        if (res.ok) {
+            alert('Lecture updated successfully!');
+            setEditingLectureId(null);
+            setLectureForm({
+                title: "", speaker: "", designation: "", company: "", bio: "",
+                date: "", time: "", location: "", attendees: 0, topics: [],
+                linkedin: "", website: "", image: "", type: "Industry Expert"
+            });
+            fetchLectures();
+        }
+    } catch (error) {
+        alert('Failed to update lecture');
+    }
+};
+
+const handleDeleteLecture = async (id: string) => {
+    if (confirm('Are you sure you want to delete this lecture?')) {
+        try {
+            const res = await fetch(`/api/lectures/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                alert('Lecture deleted successfully!');
+                fetchLectures();
+            }
+        } catch (error) {
+            alert('Failed to delete lecture');
+        }
+    }
+};

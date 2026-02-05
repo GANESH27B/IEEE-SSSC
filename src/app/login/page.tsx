@@ -1,28 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { User, Lock, ArrowRight, Loader2, ChevronLeft } from "lucide-react";
+import { User, Lock, ArrowRight, Loader2, ChevronLeft, Shield } from "lucide-react";
 import { EarthCanvas } from "@/components/ui/EarthCanvas";
 
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [error, setError] = useState("");
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError("");
 
-        // Mock login delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            // Call login API
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password
+                }),
+            });
 
-        setIsLoading(false);
-        // In a real app, handle redirect or error here
-        alert("Login simulation successful!");
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                setError(data.error || 'Invalid credentials');
+                setIsLoading(false);
+                return;
+            }
+
+            // Store user data
+            const userData = data.data;
+
+            if (userData.role === 'admin') {
+                // Admin login
+                localStorage.setItem("isAdmin", "true");
+                localStorage.setItem("adminEmail", userData.email);
+                localStorage.setItem("adminData", JSON.stringify(userData));
+                router.push("/admin");
+            } else {
+                // Member login
+                localStorage.setItem("memberData", JSON.stringify(userData));
+                router.push("/member");
+            }
+        } catch (error) {
+            setError('Login failed. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -32,17 +68,16 @@ export default function LoginPage() {
             <div className="hidden md:flex flex-1 relative bg-black items-center justify-center overflow-hidden border-r border-white/10">
                 {/* Background Video */}
                 <div className="absolute inset-0 z-0">
+                    <EarthCanvas />
                     <video
                         autoPlay
                         loop
                         muted
                         playsInline
-                        className="w-full h-full object-cover opacity-60"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 z-10"
                         poster="/images/login-poster.jpg"
                     >
                         <source src="https://cdn.pixabay.com/video/2023/10/22/186120-877174623_large.mp4" type="video/mp4" />
-                        {/* Fallback to Canvas if video fails/unsupported */}
-                        <EarthCanvas />
                     </video>
                     {/* Overlay gradient to blend video with theme */}
                     <div className="absolute inset-0 bg-cyan-950/30 mix-blend-overlay" />
@@ -81,14 +116,61 @@ export default function LoginPage() {
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="w-full max-w-md mx-auto"
                 >
+                    {/* Login Type Toggle */}
+                    <div className="flex gap-2 mb-8 bg-white/5 p-1 rounded-lg">
+                        <button
+                            onClick={() => setIsAdmin(false)}
+                            className={`flex-1 py-3 rounded-lg font-bold transition-all ${!isAdmin
+                                ? "bg-cyan-600 text-white"
+                                : "text-white/60 hover:text-white"
+                                }`}
+                        >
+                            User Login
+                        </button>
+                        <button
+                            onClick={() => setIsAdmin(true)}
+                            className={`flex-1 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${isAdmin
+                                ? "bg-cyan-600 text-white"
+                                : "text-white/60 hover:text-white"
+                                }`}
+                        >
+                            <Shield size={16} />
+                            Admin
+                        </button>
+                    </div>
+
                     <div className="mb-12">
                         <h1 className="text-4xl font-black text-white mb-3 font-[var(--font-orbitron)] tracking-wider">
-                            WELCOME <span className="text-cyan-400">BACK</span>
+                            {isAdmin ? (
+                                <>ADMIN <span className="text-cyan-400">LOGIN</span></>
+                            ) : (
+                                <>WELCOME <span className="text-cyan-400">BACK</span></>
+                            )}
                         </h1>
                         <p className="text-white/50 text-base tracking-wide leading-relaxed">
-                            Sign in to access your IEEE dashboard, manage events, and connect with the community.
+                            {isAdmin
+                                ? "Access the admin dashboard to manage content and members."
+                                : "Sign in to access your IEEE dashboard, manage events, and connect with the community."}
                         </p>
                     </div>
+
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm"
+                        >
+                            {error}
+                        </motion.div>
+                    )}
+
+                    {isAdmin && (
+                        <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/50 rounded-lg text-cyan-400 text-sm">
+                            <p className="font-bold mb-1">Demo Admin Credentials:</p>
+                            <p>Email: admin@ieee.org</p>
+                            <p>Password: admin123</p>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="space-y-3">
@@ -100,7 +182,8 @@ export default function LoginPage() {
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
-                                    placeholder="member@ieee.org"
+                                    placeholder={isAdmin ? "admin@ieee.org" : "member@ieee.org"}
+                                    required
                                 />
                             </div>
                         </div>
@@ -108,7 +191,9 @@ export default function LoginPage() {
                         <div className="space-y-3">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-xs font-bold text-cyan-500 tracking-[0.2em] uppercase">Password</label>
-                                <Link href="#" className="text-xs text-white/40 hover:text-white transition-colors tracking-wide underline underline-offset-4">Forgot Password?</Link>
+                                {!isAdmin && (
+                                    <Link href="#" className="text-xs text-white/40 hover:text-white transition-colors tracking-wide underline underline-offset-4">Forgot Password?</Link>
+                                )}
                             </div>
                             <div className="relative group">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-cyan-400 transition-colors" size={20} />
@@ -118,6 +203,7 @@ export default function LoginPage() {
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
                                     placeholder="••••••••"
+                                    required
                                 />
                             </div>
                         </div>
@@ -125,27 +211,29 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-5 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 group tracking-[0.2em] font-[var(--font-orbitron)] uppercase"
+                            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-5 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 group tracking-[0.2em] font-[var(--font-orbitron)] uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? (
                                 <Loader2 className="animate-spin" />
                             ) : (
                                 <>
-                                    Sign In
+                                    {isAdmin ? "Access Dashboard" : "Sign In"}
                                     <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-10 text-center border-t border-white/5 pt-8">
-                        <p className="text-white/40 text-sm">
-                            Don't have an account?{" "}
-                            <Link href="/register" className="text-cyan-400 font-bold hover:text-cyan-300 transition-colors tracking-wide">
-                                APPLY NOW
-                            </Link>
-                        </p>
-                    </div>
+                    {!isAdmin && (
+                        <div className="mt-10 text-center border-t border-white/5 pt-8">
+                            <p className="text-white/40 text-sm">
+                                Don't have an account?{" "}
+                                <Link href="/register" className="text-cyan-400 font-bold hover:text-cyan-300 transition-colors tracking-wide">
+                                    APPLY NOW
+                                </Link>
+                            </p>
+                        </div>
+                    )}
                 </motion.div>
             </div>
         </div>

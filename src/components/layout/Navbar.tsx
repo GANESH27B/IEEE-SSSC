@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,20 +11,12 @@ const navLinks = [
     { name: "HOME", href: "/" },
     { name: "ABOUT US", href: "/about" },
     {
-        name: "ACTIVITIES",
+        name: "EVENTS",
         href: "#",
         subLinks: [
-            { name: "COMPETITIONS", href: "/activities/competitions" },
-            { name: "WORKSHOPS", href: "/activities/workshops" },
-        ]
-    },
-    {
-        name: "INNOVATION",
-        href: "#",
-        subLinks: [
-            { name: "INTERACTIVE SESSIONS", href: "/innovation/sessions" },
-
-            { name: "GUEST LECTURES", href: "/innovation/lectures" },
+            { name: "WORKSHOPS", href: "/workshops" },
+            { name: "INTERACTIVE SESSIONS", href: "/sessions" },
+            { name: "GUEST LECTURES", href: "/lectures" },
         ]
     },
     { name: "GALLERY", href: "/gallery" },
@@ -53,19 +46,24 @@ export function Navbar() {
         >
             <div className="container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
-                <Link href="/" className="flex flex-col group -space-y-1">
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-2xl md:text-3xl font-black tracking-widest text-white group-hover:text-cyan-400 transition-colors uppercase font-[var(--font-orbitron)]">
-                            IEEE SSSC   KARE
-                        </span>
-                        <span className="text-xl md:text-2xl font-bold text-red-600 font-[var(--font-orbitron)]">
-
+                <Link href="/" className="flex items-center gap-3 group">
+                    <Image
+                        src="/ieee-logo.jpg"
+                        alt="IEEE SSCS KARE Logo"
+                        width={50}
+                        height={50}
+                        className="w-12 h-12 md:w-14 md:h-14 object-contain transition-transform group-hover:scale-110 rounded-full"
+                        priority
+                    />
+                    <div className="flex flex-col -space-y-1 overflow-hidden">
+                        <span className="text-xl sm:text-2xl md:text-4xl font-black tracking-widest text-red-500 group-hover:text-red-400 transition-colors uppercase font-[var(--font-orbitron)] truncate">
+                            IEEE SSCS KARE
                         </span>
                     </div>
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden xl:flex items-center space-x-8">
+                <div className="hidden lg:flex items-center space-x-8">
                     {navLinks.map((link) => (
                         <div
                             key={link.name}
@@ -76,8 +74,8 @@ export function Navbar() {
                             <Link
                                 href={link.href}
                                 className={cn(
-                                    "text-[11px] font-bold tracking-[0.1em] transition-colors uppercase flex items-center gap-1 font-[var(--font-orbitron)] py-2",
-                                    hoveredLink === link.name ? "text-yellow-400" : "text-white/90 hover:text-yellow-400"
+                                    "text-[16px] font-bold tracking-[0.1em] transition-colors uppercase flex items-center gap-1 font-[var(--font-orbitron)] py-2",
+                                    hoveredLink === link.name ? "text-red-500" : "text-white/90 hover:text-red-500"
                                 )}
                             >
                                 {link.name}
@@ -92,7 +90,7 @@ export function Navbar() {
                                             <Link
                                                 key={sub.name}
                                                 href={sub.href}
-                                                className="block px-4 py-3 text-[10px] text-white/70 hover:text-cyan-400 hover:bg-white/5 transition-all font-[var(--font-orbitron)] tracking-wider border-b border-white/5 last:border-0"
+                                                className="block px-4 py-3 text-[13px] text-white/70 hover:text-red-500 hover:bg-white/5 transition-all font-[var(--font-orbitron)] tracking-wider border-b border-white/5 last:border-0"
                                             >
                                                 {sub.name}
                                             </Link>
@@ -107,7 +105,7 @@ export function Navbar() {
 
                     <Link
                         href="/login"
-                        className="text-[11px] font-bold tracking-[0.1em] text-white hover:text-cyan-400 transition-colors uppercase font-[var(--font-orbitron)]"
+                        className="text-[16px] font-bold tracking-[0.1em] text-white hover:text-red-500 transition-colors uppercase font-[var(--font-orbitron)]"
                     >
                         LOG IN
                     </Link>
@@ -115,7 +113,7 @@ export function Navbar() {
 
                 {/* Mobile Menu Button */}
                 <button
-                    className="xl:hidden text-white hover:text-cyan-400 transition-colors"
+                    className="lg:hidden text-white hover:text-cyan-400 transition-colors"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -129,14 +127,14 @@ export function Navbar() {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="absolute top-full left-0 w-full glass border-b border-white/10 xl:hidden flex flex-col items-center py-8 space-y-6 bg-black/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto"
+                        className="absolute top-full left-0 w-full glass border-b border-white/10 lg:hidden flex flex-col items-center py-8 space-y-6 bg-black/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto"
                     >
                         {navLinks.map((link) => (
                             <div key={link.name} className="flex flex-col items-center space-y-2 w-full">
                                 <Link
                                     href={link.href}
                                     onClick={() => !link.subLinks && setIsOpen(false)}
-                                    className="text-lg font-bold uppercase tracking-widest hover:text-cyan-400 transition-colors text-white font-[var(--font-orbitron)]"
+                                    className="text-xl font-bold uppercase tracking-widest hover:text-red-500 transition-colors text-white font-[var(--font-orbitron)]"
                                 >
                                     {link.name}
                                 </Link>
@@ -147,7 +145,7 @@ export function Navbar() {
                                                 key={sub.name}
                                                 href={sub.href}
                                                 onClick={() => setIsOpen(false)}
-                                                className="text-sm text-white/60 hover:text-cyan-400 uppercase tracking-widest font-[var(--font-orbitron)]"
+                                                className="text-base text-white/60 hover:text-red-500 uppercase tracking-widest font-[var(--font-orbitron)]"
                                             >
                                                 {sub.name}
                                             </Link>
@@ -159,7 +157,7 @@ export function Navbar() {
                         <Link
                             href="/login"
                             onClick={() => setIsOpen(false)}
-                            className="text-lg font-bold uppercase tracking-widest text-cyan-400 hover:text-white transition-colors font-[var(--font-orbitron)] pt-4"
+                            className="text-xl font-bold uppercase tracking-widest text-white hover:text-red-500 transition-colors font-[var(--font-orbitron)] pt-4"
                         >
                             LOG IN
                         </Link>

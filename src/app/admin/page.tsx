@@ -1,0 +1,1076 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+    Users,
+    Image as ImageIcon,
+    LogOut,
+    Plus,
+    Edit,
+    Trash2,
+    Save,
+    X,
+    UserPlus,
+    Upload,
+    MessageCircle,
+    Linkedin,
+    Github
+} from "lucide-react";
+
+import { ContactMessages } from "@/components/ui/ContactMessages";
+
+type Tab = "gallery" | "team" | "users" | "workshops" | "sessions" | "lectures" | "messages";
+
+export default function AdminDashboard() {
+    const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [activeTab, setActiveTab] = useState<Tab>("gallery");
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Data states
+    const [galleryItems, setGalleryItems] = useState<any[]>([]);
+    const [teamMembers, setTeamMembers] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+
+    // Form states
+    const [isAddingGallery, setIsAddingGallery] = useState(false);
+    const [isAddingTeam, setIsAddingTeam] = useState(false);
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
+    const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isUploadingGalleryImage, setIsUploadingGalleryImage] = useState(false);
+
+    // Gallery form
+    const [galleryForm, setGalleryForm] = useState({
+        title: "",
+        description: "",
+        image: "",
+        category: "Workshop"
+    });
+
+    // Team form
+    const [teamForm, setTeamForm] = useState({
+        name: "",
+        role: "",
+        department: "",
+        year: "",
+        image: "",
+        linkedin: "",
+        github: ""
+    });
+
+    // User form
+    const [userForm, setUserForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+        role: "member",
+        department: "",
+        year: ""
+    });
+
+    // Check authentication
+    useEffect(() => {
+        const isAdmin = localStorage.getItem("isAdmin");
+        if (isAdmin !== "true") {
+            router.push("/login");
+        } else {
+            setIsAuthenticated(true);
+            fetchAllData();
+        }
+    }, [router]);
+
+    const fetchAllData = () => {
+        fetchGalleryItems();
+        fetchTeamMembers();
+        fetchUsers();
+    };
+
+    const fetchGalleryItems = async () => {
+        try {
+            const res = await fetch('/api/gallery');
+            const data = await res.json();
+            if (data.success) setGalleryItems(data.data);
+        } catch (error) {
+            console.error('Failed to fetch gallery:', error);
+        }
+    };
+
+    const fetchTeamMembers = async () => {
+        try {
+            const res = await fetch('/api/team');
+            const data = await res.json();
+            if (data.success) setTeamMembers(data.data);
+        } catch (error) {
+            console.error('Failed to fetch team:', error);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch('/api/members');
+            const data = await res.json();
+            if (data.success) setUsers(data.data);
+        } catch (error) {
+            console.error('Failed to fetch users:', error);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("isAdmin");
+        localStorage.removeItem("adminEmail");
+        localStorage.removeItem("adminData");
+        router.push("/login");
+    };
+
+    // Gallery handlers
+    const handleAddGallery = async () => {
+        try {
+            const res = await fetch('/api/gallery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(galleryForm),
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchGalleryItems();
+                setGalleryForm({ title: "", description: "", image: "", category: "Workshop" });
+                setIsAddingGallery(false);
+            }
+        } catch (error) {
+            console.error('Failed to add gallery:', error);
+        }
+    };
+
+    const handleEditGallery = (item: any) => {
+        setGalleryForm({
+            title: item.title,
+            description: item.description,
+            image: item.image,
+            category: item.category
+        });
+        setEditingGalleryId(item._id);
+    };
+
+    const handleUpdateGallery = async () => {
+        try {
+            const res = await fetch(`/api/gallery/${editingGalleryId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(galleryForm),
+            });
+            if (res.ok) {
+                alert('Gallery item updated successfully!');
+                fetchGalleryItems();
+                setGalleryForm({ title: "", description: "", image: "", category: "Workshop" });
+                setEditingGalleryId(null);
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to update gallery item');
+            }
+        } catch (error) {
+            console.error('Failed to update gallery:', error);
+            alert('Failed to update gallery item');
+        }
+    };
+
+    const handleDeleteGallery = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this item?")) return;
+        try {
+            await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+            fetchGalleryItems();
+        } catch (error) {
+            console.error('Failed to delete gallery:', error);
+        }
+    };
+
+    // Team handlers
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                setTeamForm({ ...teamForm, image: data.url });
+            } else {
+                alert('Failed to upload image');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Failed to upload image');
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
+    const handleGalleryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingGalleryImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                setGalleryForm({ ...galleryForm, image: data.url });
+            } else {
+                alert('Failed to upload image');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Failed to upload image');
+        } finally {
+            setIsUploadingGalleryImage(false);
+        }
+    };
+
+    const handleAddTeam = async () => {
+        try {
+            const res = await fetch('/api/team', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(teamForm),
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchTeamMembers();
+                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                setIsAddingTeam(false);
+            }
+        } catch (error) {
+            console.error('Failed to add team member:', error);
+        }
+    };
+
+    const handleEditTeam = (member: any) => {
+        setTeamForm({
+            name: member.name,
+            role: member.role,
+            department: member.department,
+            year: member.year,
+            image: member.image,
+            linkedin: member.linkedin || "",
+            github: member.github || ""
+        });
+        setEditingTeamId(member._id);
+    };
+
+    const handleUpdateTeam = async () => {
+        try {
+            const res = await fetch(`/api/team/${editingTeamId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(teamForm),
+            });
+            if (res.ok) {
+                alert('Team member updated successfully!');
+                fetchTeamMembers();
+                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                setEditingTeamId(null);
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to update team member');
+            }
+        } catch (error) {
+            console.error('Failed to update team member:', error);
+            alert('Failed to update team member');
+        }
+    };
+
+    const handleDeleteTeam = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this member?")) return;
+        try {
+            await fetch(`/api/team/${id}`, { method: 'DELETE' });
+            fetchTeamMembers();
+        } catch (error) {
+            console.error('Failed to delete team member:', error);
+        }
+    };
+
+    // User handlers
+    const handleAddUser = async () => {
+        try {
+            const res = await fetch('/api/members', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...userForm, isActive: true }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchUsers();
+                setUserForm({ name: "", email: "", password: "", role: "member", department: "", year: "" });
+                setIsAddingUser(false);
+                alert('User created successfully!');
+            } else {
+                alert(data.error || 'Failed to create user');
+            }
+        } catch (error) {
+            console.error('Failed to add user:', error);
+            alert('Failed to create user');
+        }
+    };
+
+    const handleEditUser = (user: any) => {
+        setUserForm({
+            name: user.name,
+            email: user.email,
+            password: "",
+            role: user.role,
+            department: user.department,
+            year: user.year
+        });
+        setEditingUserId(user._id);
+    };
+
+    const handleUpdateUser = async () => {
+        try {
+            const updateData: any = { ...userForm };
+            if (!updateData.password) delete (updateData as any).password; // Don't update password if empty
+
+            const res = await fetch(`/api/members/${editingUserId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData),
+            });
+            if (res.ok) {
+                fetchUsers();
+                setUserForm({ name: "", email: "", password: "", role: "member", department: "", year: "" });
+                setEditingUserId(null);
+                alert('User updated successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to update user:', error);
+        }
+    };
+
+    const handleDeleteUser = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this user? They will no longer be able to login.")) return;
+        try {
+            await fetch(`/api/members/${id}`, { method: 'DELETE' });
+            fetchUsers();
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+        }
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-white text-xl animate-pulse">Establishing secure link...</div>
+            </div>
+        );
+    }
+
+    const navItems = [
+        { id: "gallery" as Tab, label: "Gallery", icon: <ImageIcon size={20} /> },
+        { id: "team" as Tab, label: "Team", icon: <Users size={20} /> },
+        { id: "users" as Tab, label: "Users", icon: <UserPlus size={20} /> },
+        { id: "messages" as Tab, label: "Messages", icon: <MessageCircle size={20} /> },
+    ];
+
+    return (
+        <div className="min-h-screen bg-black flex flex-col md:flex-row">
+            {/* Mobile Header */}
+            <div className="md:hidden flex items-center justify-between p-4 bg-white/5 border-b border-white/10 sticky top-0 z-50 backdrop-blur-md">
+                <span className="font-black text-white font-[var(--font-orbitron)] tracking-tighter text-sm">ADMIN <span className="text-cyan-400">INTERFACE</span></span>
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="p-2 text-white/60 hover:text-white"
+                >
+                    {isMobileMenuOpen ? <X size={24} /> : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    )}
+                </button>
+            </div>
+
+            {/* Sidebar */}
+            <div className={`
+                fixed inset-0 z-40 md:relative md:flex w-full md:w-64 bg-black md:bg-white/5 border-r border-white/10 p-6 flex-col transform transition-transform duration-300
+                ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+            `}>
+                <div className="hidden md:block mb-8">
+                    <h2 className="text-2xl font-black text-white font-[var(--font-orbitron)] tracking-tighter">
+                        IEEE <span className="text-cyan-400">ADMIN</span>
+                    </h2>
+                </div>
+
+                <nav className="space-y-1 flex-1">
+                    <p className="text-white/30 text-[10px] uppercase font-black tracking-widest px-4 mb-4">Core Modules</p>
+                    {navItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => {
+                                setActiveTab(item.id);
+                                setIsMobileMenuOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === item.id
+                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+                                : "text-white/50 hover:bg-white/5 hover:text-white"
+                                }`}
+                        >
+                            {item.icon}
+                            <span className="font-bold">{item.label}</span>
+                        </button>
+                    ))}
+
+                    <div className="border-t border-white/10 my-6 mx-2"></div>
+                    <p className="text-white/30 text-[10px] uppercase font-black tracking-widest px-4 mb-4">Event Nodes</p>
+
+                    <Link
+                        href="/admin/workshops"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-white/50 hover:bg-white/5 hover:text-cyan-400"
+                    >
+                        <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span className="font-bold">Workshops</span>
+                    </Link>
+
+                    <Link
+                        href="/admin/sessions"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-white/50 hover:bg-white/5 hover:text-cyan-400"
+                    >
+                        <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-bold">Sessions</span>
+                    </Link>
+
+                    <Link
+                        href="/admin/lectures"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-white/50 hover:bg-white/5 hover:text-cyan-400"
+                    >
+                        <svg className="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-bold">Lectures</span>
+                    </Link>
+                </nav>
+
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all mt-6 border border-transparent hover:border-red-500/20"
+                >
+                    <LogOut size={20} />
+                    <span className="font-bold text-sm">Terminate Link</span>
+                </button>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 p-4 md:p-10 overflow-x-hidden">
+                {/* Header */}
+                <div className="mb-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-3xl md:text-5xl font-black text-white font-[var(--font-orbitron)] leading-tight mb-3">
+                            {activeTab === "gallery" && <>GALLERY <span className="text-cyan-400">DATA</span></>}
+                            {activeTab === "team" && <>CORE <span className="text-cyan-400">TEAM</span></>}
+                            {activeTab === "users" && <>IDENTITY <span className="text-cyan-400">LOG</span></>}
+                            {activeTab === "messages" && <>SIGNAL <span className="text-cyan-400">FEED</span></>}
+                        </h1>
+                        <p className="text-white/40 font-light flex items-center gap-2 text-sm">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                            {activeTab === "gallery" && "Synchronizing visual assets with main server."}
+                            {activeTab === "team" && "Listing verified operational personnel."}
+                            {activeTab === "users" && "Managing global terminal access keys."}
+                            {activeTab === "messages" && "Monitoring incoming secure data streams."}
+                        </p>
+                    </div>
+
+                    {activeTab !== "messages" && (
+                        <button
+                            onClick={() => {
+                                if (activeTab === "gallery") setIsAddingGallery(true);
+                                if (activeTab === "team") setIsAddingTeam(true);
+                                if (activeTab === "users") setIsAddingUser(true);
+                            }}
+                            className="w-full xl:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-cyan-600 to-cyan-400 hover:tracking-widest text-white px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-lg shadow-cyan-500/10 active:scale-95"
+                        >
+                            <Plus size={18} />
+                            Add {activeTab === "gallery" ? "Gallery Asset" : activeTab === "team" ? "Personnel" : "New User"}
+                        </button>
+                    )}
+                </div>
+
+                {/* Messages Tab */}
+                {activeTab === "messages" && (
+                    <ContactMessages />
+                )}
+
+                {/* Gallery Tab */}
+                {activeTab === "gallery" && (
+                    <div className="space-y-6">
+                        {(isAddingGallery || editingGalleryId) && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white/5 border border-white/10 rounded-xl p-6"
+                            >
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {editingGalleryId ? "Edit Gallery Item" : "Add New Gallery Item"}
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            setIsAddingGallery(false);
+                                            setEditingGalleryId(null);
+                                            setGalleryForm({ title: "", description: "", image: "", category: "Workshop" });
+                                        }}
+                                        className="text-white/60 hover:text-white"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-[10px] font-black tracking-widest text-white/30 uppercase mb-2 ml-2">Title</label>
+                                        <input
+                                            type="text"
+                                            value={galleryForm.title}
+                                            onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="Event title"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Category</label>
+                                        <select
+                                            value={galleryForm.category}
+                                            onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
+                                            className="w-full bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-cyan-500/30 hover:border-cyan-500/60 focus:border-cyan-500 rounded-lg px-4 py-3 text-white focus:outline-none transition-all cursor-pointer"
+                                        >
+                                            <option value="Workshop" className="bg-gray-900">Workshop</option>
+                                            <option value="Competition" className="bg-gray-900">Competition</option>
+                                            <option value="Event" className="bg-gray-900">Event</option>
+                                            <option value="Lecture" className="bg-gray-900">Lecture</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Description</label>
+                                        <textarea
+                                            value={galleryForm.description}
+                                            onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            rows={3}
+                                            placeholder="Event description"
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Event Photo</label>
+
+                                        {/* File Upload Button */}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleGalleryImageUpload}
+                                            className="hidden"
+                                            id="gallery-photo-upload"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => document.getElementById('gallery-photo-upload')?.click()}
+                                            disabled={isUploadingGalleryImage}
+                                            className="w-full flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                        >
+                                            <Upload size={20} />
+                                            {isUploadingGalleryImage ? 'Uploading...' : 'Choose Photo'}
+                                        </button>
+
+                                        {/* Image Preview */}
+                                        {galleryForm.image && (
+                                            <div className="mt-4 relative">
+                                                <div className="w-full h-40 rounded-lg overflow-hidden border-2 border-cyan-500">
+                                                    <img
+                                                        src={galleryForm.image}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => setGalleryForm({ ...galleryForm, image: '' })}
+                                                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
+                                                    type="button"
+                                                    title="Remove image"
+                                                >
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Optional URL Input */}
+                                        <div className="mt-4">
+                                            <p className="text-white/40 text-xs mb-2">Or paste image URL:</p>
+                                            <input
+                                                type="text"
+                                                value={galleryForm.image}
+                                                onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
+                                                placeholder="https://example.com/photo.jpg"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={editingGalleryId ? handleUpdateGallery : handleAddGallery}
+                                    className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                >
+                                    <Save size={20} />
+                                    {editingGalleryId ? "Update" : "Add"} Item
+                                </button>
+                            </motion.div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {galleryItems.map((item) => (
+                                <div key={item._id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                                    <div className="h-48 bg-gray-900 flex items-center justify-center relative group">
+                                        {item.image ? (
+                                            <img
+                                                src={item.image}
+                                                alt={item.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        ) : (
+                                            <ImageIcon className="text-white/20" size={48} />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                    <div className="p-4">
+                                        <span className="text-xs font-bold text-cyan-400">{item.category}</span>
+                                        <h4 className="text-lg font-bold text-white mt-1">{item.title}</h4>
+                                        <p className="text-white/60 text-sm mt-2 line-clamp-2">{item.description}</p>
+
+                                        <div className="flex gap-2 mt-4">
+                                            <button
+                                                onClick={() => handleEditGallery(item)}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 px-4 py-2 rounded-lg transition-colors"
+                                            >
+                                                <Edit size={16} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteGallery(item._id)}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Team Tab */}
+                {activeTab === "team" && (
+                    <div className="space-y-6">
+                        {(isAddingTeam || editingTeamId) && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white/5 border border-white/10 rounded-xl p-6"
+                            >
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {editingTeamId ? "Edit Team Member" : "Add New Team Member"}
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            setIsAddingTeam(false);
+                                            setEditingTeamId(null);
+                                            setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                                        }}
+                                        className="text-white/60 hover:text-white"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-[10px] font-black tracking-widest text-white/30 uppercase mb-2 ml-2">Name</label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.name}
+                                            onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="Full name"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Role</label>
+                                        <select
+                                            value={teamForm.role}
+                                            onChange={(e) => setTeamForm({ ...teamForm, role: e.target.value })}
+                                            className="w-full bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-cyan-500/30 hover:border-cyan-500/60 focus:border-cyan-500 rounded-lg px-4 py-3 text-white focus:outline-none transition-all cursor-pointer"
+                                        >
+                                            <option value="" className="bg-gray-900">Select Role</option>
+                                            <option value="Chairperson" className="bg-gray-900">Chairperson</option>
+                                            <option value="Vice Chairperson" className="bg-gray-900">Vice Chairperson</option>
+                                            <option value="Secretary" className="bg-gray-900">Secretary</option>
+                                            <option value="Treasurer" className="bg-gray-900">Treasurer</option>
+                                            <option value="Technical Head" className="bg-gray-900">Technical Head</option>
+                                            <option value="Event Coordinator" className="bg-gray-900">Event Coordinator</option>
+                                            <option value="Web Development Lead" className="bg-gray-900">Web Development Lead</option>
+                                            <option value="Core Team Member" className="bg-gray-900">Core Team Member</option>
+                                            <option value="Public Relations" className="bg-gray-900">Public Relations</option>
+                                            <option value="Research Coordinator" className="bg-gray-900">Research Coordinator</option>
+                                            <option value="Design Head" className="bg-gray-900">Design Head</option>
+                                            <option value="Marketing Head" className="bg-gray-900">Marketing Head</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Department</label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.department}
+                                            onChange={(e) => setTeamForm({ ...teamForm, department: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="ECE, CSE, etc."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Year</label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.year}
+                                            onChange={(e) => setTeamForm({ ...teamForm, year: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="Final Year, Third Year, etc."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
+                                            <Linkedin size={16} />
+                                            LinkedIn URL
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.linkedin}
+                                            onChange={(e) => setTeamForm({ ...teamForm, linkedin: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="https://linkedin.com/in/username"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
+                                            <Github size={16} />
+                                            GitHub URL
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.github}
+                                            onChange={(e) => setTeamForm({ ...teamForm, github: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="https://github.com/username"
+                                        />
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Profile Photo</label>
+
+                                        {/* File Upload Button */}
+                                        <div className="flex items-center gap-4 mb-3">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                                id="team-photo-upload"
+                                                disabled={isUploadingImage}
+                                            />
+                                            <label
+                                                htmlFor="team-photo-upload"
+                                                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-colors cursor-pointer ${isUploadingImage
+                                                    ? 'bg-gray-600 cursor-not-allowed'
+                                                    : 'bg-cyan-600 hover:bg-cyan-500'
+                                                    } text-white`}
+                                            >
+                                                <Upload size={20} />
+                                                {isUploadingImage ? 'Uploading...' : 'Choose Photo'}
+                                            </label>
+
+                                            {/* Image Preview */}
+                                            {teamForm.image && (
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={teamForm.image}
+                                                        alt="Preview"
+                                                        className="w-16 h-16 rounded-full object-cover border-2 border-cyan-500"
+                                                    />
+                                                    <button
+                                                        onClick={() => setTeamForm({ ...teamForm, image: "" })}
+                                                        className="text-red-400 hover:text-red-300 transition-colors"
+                                                        type="button"
+                                                        title="Remove image"
+                                                    >
+                                                        <X size={20} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Optional URL Input */}
+                                        <div>
+                                            <p className="text-white/40 text-xs mb-2">Or paste image URL:</p>
+                                            <input
+                                                type="text"
+                                                value={teamForm.image}
+                                                onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
+                                                placeholder="https://example.com/photo.jpg"
+                                            />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    onClick={editingTeamId ? handleUpdateTeam : handleAddTeam}
+                                    className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                >
+                                    <Save size={20} />
+                                    {editingTeamId ? "Update" : "Add"} Member
+                                </button>
+                            </motion.div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {teamMembers.map((member) => (
+                                <div key={member._id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                                    <div className="h-56 bg-gray-900 flex items-center justify-center relative group">
+                                        {member.image ? (
+                                            <img
+                                                src={member.image}
+                                                alt={member.name}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        ) : (
+                                            <Users className="text-white/20" size={48} />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                    <div className="p-4">
+                                        <h4 className="text-lg font-bold text-white">{member.name}</h4>
+                                        <p className="text-cyan-400 text-sm font-bold mt-1">{member.role}</p>
+                                        <p className="text-white/60 text-sm mt-2">
+                                            {member.department} • {member.year}
+                                        </p>
+
+                                        <div className="flex gap-2 mt-4">
+                                            <button
+                                                onClick={() => handleEditTeam(member)}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 px-4 py-2 rounded-lg transition-colors"
+                                            >
+                                                <Edit size={16} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteTeam(member._id)}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                                            >
+                                                <Trash2 size={16} />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Users Tab */}
+                {activeTab === "users" && (
+                    <div className="space-y-6">
+                        {(isAddingUser || editingUserId) && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white/5 border border-white/10 rounded-xl p-6"
+                            >
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-bold text-white">
+                                        {editingUserId ? "Edit User Account" : "Create New User Account"}
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            setIsAddingUser(false);
+                                            setEditingUserId(null);
+                                            setUserForm({ name: "", email: "", password: "", role: "member", department: "", year: "" });
+                                        }}
+                                        className="text-white/60 hover:text-white"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Full Name</label>
+                                        <input
+                                            type="text"
+                                            value={userForm.name}
+                                            onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Email</label>
+                                        <input
+                                            type="email"
+                                            value={userForm.email}
+                                            onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="john@ieee.org"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">
+                                            Password {editingUserId && "(leave empty to keep current)"}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={userForm.password}
+                                            onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Role</label>
+                                        <select
+                                            value={userForm.role}
+                                            onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                        >
+                                            <option value="member">Member</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Department</label>
+                                        <input
+                                            type="text"
+                                            value={userForm.department}
+                                            onChange={(e) => setUserForm({ ...userForm, department: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="ECE, CSE, etc."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Year</label>
+                                        <input
+                                            type="text"
+                                            value={userForm.year}
+                                            onChange={(e) => setUserForm({ ...userForm, year: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="Final Year, Third Year, etc."
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={editingUserId ? handleUpdateUser : handleAddUser}
+                                    className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                >
+                                    <Save size={20} />
+                                    {editingUserId ? "Update" : "Create"} Account
+                                </button>
+                            </motion.div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {users.map((user) => (
+                                <div key={user._id} className="bg-white/5 border border-white/10 rounded-xl p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center">
+                                            <UserPlus className="text-cyan-400" size={24} />
+                                        </div>
+                                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${user.role === 'admin'
+                                            ? 'bg-purple-500/20 text-purple-400'
+                                            : 'bg-cyan-500/20 text-cyan-400'
+                                            }`}>
+                                            {user.role.toUpperCase()}
+                                        </span>
+                                    </div>
+
+                                    <h4 className="text-lg font-bold text-white">{user.name}</h4>
+                                    <p className="text-white/60 text-sm mt-1">{user.email}</p>
+                                    <p className="text-white/40 text-sm mt-2">
+                                        {user.department} • {user.year}
+                                    </p>
+
+                                    <div className="flex gap-2 mt-4">
+                                        <button
+                                            onClick={() => handleEditUser(user)}
+                                            className="flex-1 flex items-center justify-center gap-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            <Edit size={16} />
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteUser(user._id)}
+                                            className="flex-1 flex items-center justify-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {users.length === 0 && (
+                            <div className="text-center py-12">
+                                <UserPlus className="mx-auto text-white/20 mb-4" size={64} />
+                                <p className="text-white/60">No user accounts yet. Create one to get started!</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
