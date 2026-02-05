@@ -110,7 +110,7 @@ export default function RegisterPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">Email <Address></Address></label>
+                            <label className="text-xs font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">Email Address</label>
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-cyan-400 transition-colors" size={20} />
                                 <input

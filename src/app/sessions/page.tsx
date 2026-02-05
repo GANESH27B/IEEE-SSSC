@@ -205,7 +205,7 @@ export default function InteractiveSessionsPage() {
                                 <div className="mb-4">
                                     <p className="text-cyan-400 text-xs font-bold mb-2">Tools & Topics:</p>
                                     <div className="flex flex-wrap gap-1">
-                                        {session.tools.slice(0, 3).map((tool, i) => (
+                                        {session.tools.slice(0, 3).map((tool: string, i: number) => (
                                             <span key={i} className="px-2 py-1 bg-cyan-500/10 rounded text-xs text-cyan-300">
                                                 {tool}
                                             </span>
