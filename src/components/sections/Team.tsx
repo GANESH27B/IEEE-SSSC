@@ -50,6 +50,7 @@ export function Team() {
 
     // Define role order for display
     const roleOrder = [
+        'Chapter advisor',
         'Chairperson',
         'Vice Chairperson',
         'Secretary',

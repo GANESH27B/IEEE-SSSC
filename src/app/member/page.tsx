@@ -49,7 +49,11 @@ export default function MemberDashboard() {
         role: "",
         department: "",
         year: "",
-        image: ""
+        image: "",
+        linkedin: "",
+        github: "",
+        isLead: false,
+        isCore: false
     });
 
     // Check authentication on mount
@@ -222,7 +226,17 @@ export default function MemberDashboard() {
             const data = await res.json();
             if (data.success) {
                 setTeamMembers([data.data, ...teamMembers]);
-                setTeamForm({ name: "", role: "", department: "", year: "", image: "" });
+                setTeamForm({
+                    name: "",
+                    role: "",
+                    department: "",
+                    year: "",
+                    image: "",
+                    linkedin: "",
+                    github: "",
+                    isLead: false,
+                    isCore: false
+                });
                 setIsAddingTeam(false);
             }
         } catch (error) {
@@ -237,7 +251,11 @@ export default function MemberDashboard() {
             role: item.role,
             department: item.department,
             year: item.year || "",
-            image: item.image
+            image: item.image,
+            linkedin: item.linkedin || "",
+            github: item.github || "",
+            isLead: item.isLead || false,
+            isCore: item.isCore || false
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -252,7 +270,17 @@ export default function MemberDashboard() {
             const data = await res.json();
             if (data.success) {
                 setTeamMembers(teamMembers.map(item => item._id === editingTeamId ? data.data : item));
-                setTeamForm({ name: "", role: "", department: "", year: "", image: "" });
+                setTeamForm({
+                    name: "",
+                    role: "",
+                    department: "",
+                    year: "",
+                    image: "",
+                    linkedin: "",
+                    github: "",
+                    isLead: false,
+                    isCore: false
+                });
                 setEditingTeamId(null);
             }
         } catch (error) {
@@ -531,7 +559,7 @@ export default function MemberDashboard() {
                                             <div className="w-full h-full bg-gray-900 flex items-center justify-center"><ImageIcon className="text-white/10" size={48} /></div>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                                        
+
                                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
                                             <button onClick={() => handleEditGallery(item)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all border border-white/10 shadow-xl"><Edit size={16} /></button>
                                             <button onClick={() => handleDeleteGallery(item._id)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10 shadow-xl"><Trash2 size={16} /></button>
@@ -565,7 +593,17 @@ export default function MemberDashboard() {
                                     <button
                                         onClick={() => {
                                             setEditingTeamId(null);
-                                            setTeamForm({ name: "", role: "", department: "", year: "", image: "" });
+                                            setTeamForm({
+                                                name: "",
+                                                role: "",
+                                                department: "",
+                                                year: "",
+                                                image: "",
+                                                linkedin: "",
+                                                github: "",
+                                                isLead: false,
+                                                isCore: false
+                                            });
                                         }}
                                         className="text-white/40 hover:text-white transition-colors"
                                     >
@@ -587,13 +625,24 @@ export default function MemberDashboard() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Role</label>
-                                    <input
-                                        type="text"
+                                    <select
                                         value={teamForm.role}
                                         onChange={(e) => setTeamForm({ ...teamForm, role: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
-                                        placeholder="e.g. Technical Lead"
-                                    />
+                                        className="w-full bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-cyan-500/30 hover:border-cyan-500/60 focus:border-cyan-500 rounded-lg px-4 py-3 text-white focus:outline-none transition-all cursor-pointer"
+                                    >
+                                        <option value="" className="bg-gray-900">Select Role</option>
+                                        <option value="Chapter advisor" className="bg-gray-900">Chapter advisor</option>
+                                        <option value="Chairperson" className="bg-gray-900">Chairperson</option>
+                                        <option value="Vice Chairperson" className="bg-gray-900">Vice Chairperson</option>
+                                        <option value="Secretary" className="bg-gray-900">Secretary</option>
+                                        <option value="Technical Head" className="bg-gray-900">Technical Team</option>
+                                        <option value="Event Coordinator" className="bg-gray-900">Event Coordinator</option>
+                                        <option value="Web Development Lead" className="bg-gray-900">Web Development</option>
+                                        <option value="Core Team Member" className="bg-gray-900">Core Team Member</option>
+                                        <option value="Public Relations" className="bg-gray-900">Public Relations</option>
+                                        <option value="Research Coordinator" className="bg-gray-900">Research Coordinator</option>
+                                        <option value="Design Head" className="bg-gray-900">Design Team</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Department</label>
@@ -614,6 +663,65 @@ export default function MemberDashboard() {
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
                                         placeholder="e.g. Third Year"
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-cyan-400 mb-2 font-[var(--font-orbitron)] tracking-tight">LinkedIn URL</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cyan-500/50">
+                                            <MessageCircle size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={teamForm.linkedin}
+                                            onChange={(e) => setTeamForm({ ...teamForm, linkedin: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all font-mono text-sm"
+                                            placeholder="https://linkedin.com/in/..."
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-cyan-400 mb-2 font-[var(--font-orbitron)] tracking-tight">GitHub URL</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cyan-500/50">
+                                            <Plus size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={teamForm.github}
+                                            onChange={(e) => setTeamForm({ ...teamForm, github: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all font-mono text-sm"
+                                            placeholder="https://github.com/..."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                    <label className="block text-sm font-bold text-cyan-400 font-[var(--font-orbitron)] tracking-tight">Designations</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex-1 flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/10 transition-all group">
+                                            <input
+                                                type="checkbox"
+                                                checked={teamForm.isLead}
+                                                onChange={(e) => setTeamForm({ ...teamForm, isLead: e.target.checked })}
+                                                className="hidden"
+                                            />
+                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${teamForm.isLead ? 'bg-cyan-500 border-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'border-white/20'}`}>
+                                                {teamForm.isLead && <X size={14} className="text-white" />}
+                                            </div>
+                                            <span className={`text-xs font-bold uppercase tracking-widest ${teamForm.isLead ? 'text-cyan-400' : 'text-white/40 group-hover:text-white/60'}`}>Lead Role</span>
+                                        </label>
+                                        <label className="flex-1 flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer hover:bg-white/10 transition-all group">
+                                            <input
+                                                type="checkbox"
+                                                checked={teamForm.isCore}
+                                                onChange={(e) => setTeamForm({ ...teamForm, isCore: e.target.checked })}
+                                                className="hidden"
+                                            />
+                                            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${teamForm.isCore ? 'bg-purple-500 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]' : 'border-white/20'}`}>
+                                                {teamForm.isCore && <X size={14} className="text-white" />}
+                                            </div>
+                                            <span className={`text-xs font-bold uppercase tracking-widest ${teamForm.isCore ? 'text-purple-400' : 'text-white/40 group-hover:text-white/60'}`}>Core Team</span>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div className="col-span-1 md:col-span-2">
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Profile Photo</label>
@@ -669,7 +777,7 @@ export default function MemberDashboard() {
                                             <div className="w-full h-full bg-gray-900 flex items-center justify-center"><Users className="text-white/10" size={48} /></div>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                                        
+
                                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
                                             <button onClick={() => handleEditTeam(member)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all border border-white/10 shadow-xl"><Edit size={16} /></button>
                                             <button onClick={() => handleDeleteTeam(member._id)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10 shadow-xl"><Trash2 size={16} /></button>

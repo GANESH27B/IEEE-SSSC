@@ -744,6 +744,7 @@ export default function AdminDashboard() {
                                             className="w-full bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-cyan-500/30 hover:border-cyan-500/60 focus:border-cyan-500 rounded-lg px-4 py-3 text-white focus:outline-none transition-all cursor-pointer"
                                         >
                                             <option value="" className="bg-gray-900">Select Role</option>
+                                            <option value="Chapter advisor" className="bg-gray-900">Chapter advisor</option>
                                             <option value="Chairperson" className="bg-gray-900">Chairperson</option>
                                             <option value="Vice Chairperson" className="bg-gray-900">Vice Chairperson</option>
                                             <option value="Secretary" className="bg-gray-900">Secretary</option>
