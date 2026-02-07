@@ -11,33 +11,33 @@ const SessionSchema = new mongoose.Schema({
     },
     date: {
         type: String,
-        required: true,
+        default: '',
     },
     time: {
         type: String,
-        required: true,
+        default: '',
     },
     location: {
         type: String,
-        required: true,
+        default: '',
     },
     mode: {
         type: String,
         enum: ['Online', 'Hybrid', 'In-Person'],
-        required: true,
+        default: 'Online',
     },
     host: {
         type: String,
-        required: true,
+        default: '',
     },
     participants: {
         type: Number,
-        required: true,
+        default: 0,
     },
     type: {
         type: String,
         enum: ['Live Coding', 'Workshop', 'Demo', 'Challenge'],
-        required: true,
+        default: 'Workshop',
     },
     tools: {
         type: [String],

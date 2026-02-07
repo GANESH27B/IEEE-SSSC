@@ -11,12 +11,15 @@ const TeamMemberSchema = new mongoose.Schema({
     },
     department: {
         type: String,
-        required: true,
+        default: '',
     },
-
+    year: {
+        type: String,
+        default: '',
+    },
     image: {
         type: String,
-        required: true,
+        default: '',
     },
     linkedin: {
         type: String,

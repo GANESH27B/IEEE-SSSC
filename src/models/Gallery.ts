@@ -7,16 +7,16 @@ const GallerySchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
+        default: '',
     },
     image: {
         type: String,
-        required: true,
+        default: '',
     },
     category: {
         type: String,
-        required: true,
         enum: ['Workshop', 'Competition', 'Event', 'Lecture'],
+        default: 'Event',
     },
     createdAt: {
         type: Date,

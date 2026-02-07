@@ -11,32 +11,32 @@ const WorkshopSchema = new mongoose.Schema({
     },
     date: {
         type: String,
-        required: true,
+        default: '',
     },
     time: {
         type: String,
-        required: true,
+        default: '',
     },
     location: {
         type: String,
-        required: true,
+        default: '',
     },
     instructor: {
         type: String,
-        required: true,
+        default: '',
     },
     seats: {
         type: Number,
-        required: true,
+        default: 0,
     },
     level: {
         type: String,
         enum: ['Beginner', 'Intermediate', 'Advanced'],
-        required: true,
+        default: 'Beginner',
     },
     duration: {
         type: String,
-        required: true,
+        default: '',
     },
     topics: {
         type: [String],

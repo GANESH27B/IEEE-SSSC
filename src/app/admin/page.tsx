@@ -58,6 +58,7 @@ export default function AdminDashboard() {
         name: "",
         role: "",
         department: "",
+        year: "",
         image: "",
         linkedin: "",
         github: "",
@@ -257,8 +258,7 @@ export default function AdminDashboard() {
             const data = await res.json();
             if (data.success) {
                 fetchTeamMembers();
-                fetchTeamMembers();
-                setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
+                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                 setIsAddingTeam(false);
             }
         } catch (error) {
@@ -271,6 +271,7 @@ export default function AdminDashboard() {
             name: member.name,
             role: member.role,
             department: member.department,
+            year: member.year || "",
             image: member.image,
             linkedin: member.linkedin || "",
             github: member.github || "",
@@ -291,7 +292,7 @@ export default function AdminDashboard() {
                 alert('Team member updated successfully!');
                 fetchTeamMembers();
                 fetchTeamMembers();
-                setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
+                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                 setEditingTeamId(null);
             } else {
                 const data = await res.json();
@@ -712,11 +713,7 @@ export default function AdminDashboard() {
                                         onClick={() => {
                                             setIsAddingTeam(false);
                                             setEditingTeamId(null);
-                                            setIsAddingTeam(false);
-                                            setEditingTeamId(null);
-                                            setIsAddingTeam(false);
-                                            setEditingTeamId(null);
-                                            setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
+                                            setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                                         }}
                                         className="text-white/60 hover:text-white"
                                     >
@@ -794,6 +791,17 @@ export default function AdminDashboard() {
                                             onChange={(e) => setTeamForm({ ...teamForm, department: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
                                             placeholder="ECE, CSE, etc."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Year</label>
+                                        <input
+                                            type="text"
+                                            value={teamForm.year}
+                                            onChange={(e) => setTeamForm({ ...teamForm, year: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                            placeholder="1st, 2nd, etc."
                                         />
                                     </div>
 

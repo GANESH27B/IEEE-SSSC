@@ -7,35 +7,35 @@ const LectureSchema = new mongoose.Schema({
     },
     speaker: {
         type: String,
-        required: true,
+        default: '',
     },
     designation: {
         type: String,
-        required: true,
+        default: '',
     },
     company: {
         type: String,
-        required: true,
+        default: '',
     },
     bio: {
         type: String,
-        required: true,
+        default: '',
     },
     date: {
         type: String,
-        required: true,
+        default: '',
     },
     time: {
         type: String,
-        required: true,
+        default: '',
     },
     location: {
         type: String,
-        required: true,
+        default: '',
     },
     attendees: {
         type: Number,
-        required: true,
+        default: 0,
     },
     topics: {
         type: [String],
@@ -56,7 +56,7 @@ const LectureSchema = new mongoose.Schema({
     type: {
         type: String,
         enum: ['Industry Expert', 'Academic', 'Researcher', 'Entrepreneur'],
-        required: true,
+        default: 'Industry Expert',
     },
     createdBy: {
         type: String,
