@@ -1,0 +1,15 @@
+﻿    // Team form
+    const [teamForm, setTeamForm] = useState({
+        name: "",
+        role: "",
+        department: "",
+        image: "",
+        linkedin: "",
+        github: "",
+        isLead: false,
+        isCore: false
+    });
+
+    // User form
+    const [userForm, setUserForm] = useState({
+        name: "",

@@ -1,0 +1,100 @@
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+    Users,
+    Image as ImageIcon,
+    LogOut,
+    Plus,
+    Edit,
+    Trash2,
+    Save,
+    X,
+    UserPlus,
+    Upload,
+    MessageCircle,
+    Linkedin,
+    Github
+} from "lucide-react";
+
+import { ContactMessages } from "@/components/ui/ContactMessages";
+
+type Tab = "gallery" | "team" | "users" | "workshops" | "sessions" | "lectures" | "messages";
+
+export default function AdminDashboard() {
+    const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [activeTab, setActiveTab] = useState<Tab>("gallery");
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Data states
+    const [galleryItems, setGalleryItems] = useState<any[]>([]);
+    const [teamMembers, setTeamMembers] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+
+    // Form states
+    const [isAddingGallery, setIsAddingGallery] = useState(false);
+    const [isAddingTeam, setIsAddingTeam] = useState(false);
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
+    const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isUploadingGalleryImage, setIsUploadingGalleryImage] = useState(false);
+
+    // Gallery form
+    const [galleryForm, setGalleryForm] = useState({
+        title: "",
+        description: "",
+        image: "",
+        category: "Workshop"
+    });
+
+    // Team form
+    const [teamForm, setTeamForm] = useState({
+        name: "",
+        role: "",
+        department: "",
+        image: "",
+        linkedin: "",
+        github: "",
+        isLead: false,
+        isCore: false
+    });
+
+    // User form
+    const [userForm, setUserForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+        role: "member",
+        department: "",
+        year: ""
+    });
+
+    // Check authentication
+    useEffect(() => {
+        const isAdmin = localStorage.getItem("isAdmin");
+        if (isAdmin !== "true") {
+            router.push("/login");
+        } else {
+            setIsAuthenticated(true);
+            fetchAllData();
+        }
+    }, [router]);
+
+    const fetchAllData = () => {
+        fetchGalleryItems();
+        fetchTeamMembers();
+        fetchUsers();
+    };
+
+    const fetchGalleryItems = async () => {
+        try {
+            const res = await fetch('/api/gallery');
+            const data = await res.json();
+            if (data.success) setGalleryItems(data.data);
+        } catch (error) {
