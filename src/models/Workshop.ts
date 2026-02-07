@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 const WorkshopSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
+        default: '',
     },
     description: {
         type: String,
-        required: true,
+        default: '',
     },
     date: {
         type: String,

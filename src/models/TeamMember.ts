@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 const TeamMemberSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        default: '',
     },
     role: {
         type: String,
-        required: true,
+        default: '',
     },
     department: {
         type: String,

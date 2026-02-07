@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const MemberSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        default: '',
     },
     email: {
         type: String,
@@ -12,7 +12,7 @@ const MemberSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        default: 'password123', // Default password for placeholder accounts
     },
     role: {
         type: String,

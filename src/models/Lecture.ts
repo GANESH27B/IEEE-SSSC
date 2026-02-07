@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const LectureSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
+        default: '',
     },
     speaker: {
         type: String,
