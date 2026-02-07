@@ -103,12 +103,7 @@ export function Navbar() {
 
                     <div className="w-px h-6 bg-white/20 mx-2"></div>
 
-                    <Link
-                        href="/login"
-                        className="text-[16px] font-bold tracking-[0.1em] text-white hover:text-red-500 transition-colors uppercase font-[var(--font-orbitron)]"
-                    >
-                        LOG IN
-                    </Link>
+                   
                 </div>
 
                 {/* Mobile Menu Button */}

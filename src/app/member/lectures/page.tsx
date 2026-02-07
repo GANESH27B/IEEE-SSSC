@@ -108,10 +108,6 @@ export default function MemberLecturesPage() {
     };
 
     const handleEdit = (lecture: any) => {
-        if (lecture.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only edit your own submissions');
-            return;
-        }
         setEditingId(lecture._id);
         setForm({
             title: lecture.title,
@@ -154,10 +150,6 @@ export default function MemberLecturesPage() {
     };
 
     const handleDelete = async (lecture: any) => {
-        if (lecture.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only delete your own submissions');
-            return;
-        }
         if (confirm('Are you sure you want to delete this lecture proposal?')) {
             try {
                 const res = await fetch(`/api/lectures/${lecture._id}`, { method: 'DELETE' });
@@ -382,9 +374,8 @@ export default function MemberLecturesPage() {
                     </motion.div>
                 )}
 
-                {/* Lectures List */}
                 <div className="space-y-8">
-                    {lectures.filter(l => l.createdBy === memberData?.email).map((lecture) => (
+                    {lectures.map((lecture) => (
                         <motion.div
                             key={lecture._id}
                             layout
@@ -417,7 +408,7 @@ export default function MemberLecturesPage() {
                     ))}
                 </div>
 
-                {lectures.filter(l => l.createdBy === memberData?.email).length === 0 && (
+                {lectures.length === 0 && (
                     <div className="mt-12 p-32 text-center rounded-[3rem] border border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
                         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Mic size={24} className="text-white/10" />

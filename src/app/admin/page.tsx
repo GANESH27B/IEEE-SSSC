@@ -54,14 +54,17 @@ export default function AdminDashboard() {
     });
 
     // Team form
+    // Team form
     const [teamForm, setTeamForm] = useState({
         name: "",
         role: "",
         department: "",
-        year: "",
+        department: "",
         image: "",
         linkedin: "",
-        github: ""
+        github: "",
+        isLead: false,
+        isCore: false
     });
 
     // User form
@@ -256,7 +259,8 @@ export default function AdminDashboard() {
             const data = await res.json();
             if (data.success) {
                 fetchTeamMembers();
-                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                fetchTeamMembers();
+                setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                 setIsAddingTeam(false);
             }
         } catch (error) {
@@ -269,10 +273,12 @@ export default function AdminDashboard() {
             name: member.name,
             role: member.role,
             department: member.department,
-            year: member.year,
+            department: member.department,
             image: member.image,
             linkedin: member.linkedin || "",
-            github: member.github || ""
+            github: member.github || "",
+            isLead: member.isLead || false,
+            isCore: member.isCore || false
         });
         setEditingTeamId(member._id);
     };
@@ -287,7 +293,8 @@ export default function AdminDashboard() {
             if (res.ok) {
                 alert('Team member updated successfully!');
                 fetchTeamMembers();
-                setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                fetchTeamMembers();
+                setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                 setEditingTeamId(null);
             } else {
                 const data = await res.json();
@@ -708,7 +715,11 @@ export default function AdminDashboard() {
                                         onClick={() => {
                                             setIsAddingTeam(false);
                                             setEditingTeamId(null);
-                                            setTeamForm({ name: "", role: "", department: "", year: "", image: "", linkedin: "", github: "" });
+                                            setIsAddingTeam(false);
+                                            setEditingTeamId(null);
+                                            setIsAddingTeam(false);
+                                            setEditingTeamId(null);
+                                            setTeamForm({ name: "", role: "", department: "", image: "", linkedin: "", github: "", isLead: false, isCore: false });
                                         }}
                                         className="text-white/60 hover:text-white"
                                     >
@@ -739,16 +750,42 @@ export default function AdminDashboard() {
                                             <option value="Chairperson" className="bg-gray-900">Chairperson</option>
                                             <option value="Vice Chairperson" className="bg-gray-900">Vice Chairperson</option>
                                             <option value="Secretary" className="bg-gray-900">Secretary</option>
-                                            <option value="Treasurer" className="bg-gray-900">Treasurer</option>
-                                            <option value="Technical Head" className="bg-gray-900">Technical Head</option>
+                                            <option value="Technical Head" className="bg-gray-900">Technical Team</option>
                                             <option value="Event Coordinator" className="bg-gray-900">Event Coordinator</option>
-                                            <option value="Web Development Lead" className="bg-gray-900">Web Development Lead</option>
+                                            <option value="Web Development Lead" className="bg-gray-900">Web Development</option>
                                             <option value="Core Team Member" className="bg-gray-900">Core Team Member</option>
                                             <option value="Public Relations" className="bg-gray-900">Public Relations</option>
                                             <option value="Research Coordinator" className="bg-gray-900">Research Coordinator</option>
-                                            <option value="Design Head" className="bg-gray-900">Design Head</option>
-                                            <option value="Marketing Head" className="bg-gray-900">Marketing Head</option>
+                                            <option value="Design Head" className="bg-gray-900">Design Team</option>
                                         </select>
+
+                                        <div className="mt-4 space-y-2">
+                                            <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
+                                                <input
+                                                    type="checkbox"
+                                                    id="isLead"
+                                                    checked={teamForm.isLead}
+                                                    onChange={(e) => setTeamForm({ ...teamForm, isLead: e.target.checked })}
+                                                    className="w-5 h-5 rounded border-white/20 text-cyan-500 focus:ring-cyan-500 bg-black/40 cursor-pointer"
+                                                />
+                                                <label htmlFor="isLead" className="text-white/80 text-sm font-bold cursor-pointer select-none flex items-center gap-2">
+                                                    Mark as Role Lead <span className="text-yellow-400">⭐</span>
+                                                </label>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
+                                                <input
+                                                    type="checkbox"
+                                                    id="isCore"
+                                                    checked={teamForm.isCore}
+                                                    onChange={(e) => setTeamForm({ ...teamForm, isCore: e.target.checked })}
+                                                    className="w-5 h-5 rounded border-white/20 text-purple-500 focus:ring-purple-500 bg-black/40 cursor-pointer"
+                                                />
+                                                <label htmlFor="isCore" className="text-white/80 text-sm font-bold cursor-pointer select-none flex items-center gap-2">
+                                                    Mark as Core Team <span className="text-purple-400">🛡️</span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div>
@@ -762,16 +799,7 @@ export default function AdminDashboard() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-bold text-cyan-400 mb-2">Year</label>
-                                        <input
-                                            type="text"
-                                            value={teamForm.year}
-                                            onChange={(e) => setTeamForm({ ...teamForm, year: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
-                                            placeholder="Final Year, Third Year, etc."
-                                        />
-                                    </div>
+
 
                                     <div>
                                         <label className="block text-sm font-bold text-cyan-400 mb-2 flex items-center gap-2">
@@ -886,10 +914,22 @@ export default function AdminDashboard() {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </div>
                                     <div className="p-4">
-                                        <h4 className="text-lg font-bold text-white">{member.name}</h4>
+                                        <h4 className="text-lg font-bold text-white flex flex-wrap items-center gap-2">
+                                            {member.name}
+                                            {member.isLead && (
+                                                <span className="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded border border-yellow-500/30">
+                                                    ⭐ LEAD
+                                                </span>
+                                            )}
+                                            {member.isCore && (
+                                                <span className="bg-purple-500/20 text-purple-400 text-[10px] px-2 py-0.5 rounded border border-purple-500/30">
+                                                    🛡️ CORE
+                                                </span>
+                                            )}
+                                        </h4>
                                         <p className="text-cyan-400 text-sm font-bold mt-1">{member.role}</p>
                                         <p className="text-white/60 text-sm mt-2">
-                                            {member.department} • {member.year}
+                                            {member.department}
                                         </p>
 
                                         <div className="flex gap-2 mt-4">

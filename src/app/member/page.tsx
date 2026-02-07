@@ -13,7 +13,9 @@ import {
     X,
     User,
     Upload,
-    MessageCircle
+    MessageCircle,
+    Edit,
+    Trash2
 } from "lucide-react";
 import { ContactMessages } from "@/components/ui/ContactMessages";
 
@@ -30,6 +32,8 @@ export default function MemberDashboard() {
     const [teamMembers, setTeamMembers] = useState<any[]>([]);
     const [isUploadingGalleryImage, setIsUploadingGalleryImage] = useState(false);
     const [isUploadingTeamImage, setIsUploadingTeamImage] = useState(false);
+    const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
+    const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
 
     // Gallery form state
     const [galleryForm, setGalleryForm] = useState({
@@ -138,6 +142,47 @@ export default function MemberDashboard() {
         }
     };
 
+    const handleEditGallery = (item: any) => {
+        setEditingGalleryId(item._id);
+        setGalleryForm({
+            title: item.title,
+            description: item.description,
+            image: item.image,
+            category: item.category
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleUpdateGallery = async () => {
+        try {
+            const res = await fetch(`/api/gallery/${editingGalleryId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(galleryForm),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setGalleryItems(galleryItems.map(item => item._id === editingGalleryId ? data.data : item));
+                setGalleryForm({ title: "", description: "", image: "", category: "Workshop" });
+                setEditingGalleryId(null);
+            }
+        } catch (error) {
+            console.error('Failed to update gallery item:', error);
+        }
+    };
+
+    const handleDeleteGallery = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this gallery item?')) return;
+        try {
+            const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setGalleryItems(galleryItems.filter(item => item._id !== id));
+            }
+        } catch (error) {
+            console.error('Failed to delete gallery item:', error);
+        }
+    };
+
     // Team functions
     const handleTeamImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -182,6 +227,48 @@ export default function MemberDashboard() {
             }
         } catch (error) {
             console.error('Failed to add team member:', error);
+        }
+    };
+
+    const handleEditTeam = (item: any) => {
+        setEditingTeamId(item._id);
+        setTeamForm({
+            name: item.name,
+            role: item.role,
+            department: item.department,
+            year: item.year || "",
+            image: item.image
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleUpdateTeam = async () => {
+        try {
+            const res = await fetch(`/api/team/${editingTeamId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(teamForm),
+            });
+            const data = await res.json();
+            if (data.success) {
+                setTeamMembers(teamMembers.map(item => item._id === editingTeamId ? data.data : item));
+                setTeamForm({ name: "", role: "", department: "", year: "", image: "" });
+                setEditingTeamId(null);
+            }
+        } catch (error) {
+            console.error('Failed to update team member:', error);
+        }
+    };
+
+    const handleDeleteTeam = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this team member?')) return;
+        try {
+            const res = await fetch(`/api/team/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setTeamMembers(teamMembers.filter(item => item._id !== id));
+            }
+        } catch (error) {
+            console.error('Failed to delete team member:', error);
         }
     };
 
@@ -316,15 +403,30 @@ export default function MemberDashboard() {
                 {/* Gallery Tab */}
                 {activeTab === "gallery" && (
                     <div className="space-y-6">
-                        {/* Add Form */}
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/5 border border-white/10 rounded-xl p-6"
+                            className="bg-white/5 border border-cyan-500/30 rounded-xl p-6 shadow-[0_0_20px_rgba(34,211,238,0.05)]"
                         >
-                            <h3 className="text-xl font-bold text-white mb-4">Add New Gallery Item</h3>
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <ImageIcon className="text-cyan-400" size={20} />
+                                    {editingGalleryId ? 'Update Gallery Item' : 'Add New Gallery Item'}
+                                </h3>
+                                {editingGalleryId && (
+                                    <button
+                                        onClick={() => {
+                                            setEditingGalleryId(null);
+                                            setGalleryForm({ title: "", description: "", image: "", category: "Workshop" });
+                                        }}
+                                        className="text-white/40 hover:text-white transition-colors"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Title</label>
                                     <input
@@ -350,7 +452,7 @@ export default function MemberDashboard() {
                                     </select>
                                 </div>
 
-                                <div className="col-span-2">
+                                <div className="col-span-1 md:col-span-2">
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Description</label>
                                     <textarea
                                         value={galleryForm.description}
@@ -361,11 +463,8 @@ export default function MemberDashboard() {
                                     />
                                 </div>
 
-
-                                <div className="col-span-2">
+                                <div className="col-span-1 md:col-span-2">
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Event Photo</label>
-
-                                    {/* File Upload Button */}
                                     <div className="flex items-center gap-4 mb-3">
                                         <input
                                             type="file"
@@ -386,7 +485,6 @@ export default function MemberDashboard() {
                                             {isUploadingGalleryImage ? 'Uploading...' : 'Choose Photo'}
                                         </label>
 
-                                        {/* Image Preview */}
                                         {galleryForm.image && (
                                             <div className="flex items-center gap-3">
                                                 <img
@@ -398,67 +496,54 @@ export default function MemberDashboard() {
                                                     onClick={() => setGalleryForm({ ...galleryForm, image: "" })}
                                                     className="text-red-400 hover:text-red-300 transition-colors"
                                                     type="button"
-                                                    title="Remove image"
                                                 >
                                                     <X size={20} />
                                                 </button>
                                             </div>
                                         )}
                                     </div>
-
-                                    {/* Optional URL Input */}
-                                    <div>
-                                        <p className="text-white/40 text-xs mb-2">Or paste image URL:</p>
-                                        <input
-                                            type="text"
-                                            value={galleryForm.image}
-                                            onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
-                                            placeholder="https://example.com/photo.jpg"
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        value={galleryForm.image}
+                                        onChange={(e) => setGalleryForm({ ...galleryForm, image: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
+                                        placeholder="Or paste image URL"
+                                    />
                                 </div>
-
                             </div>
 
                             <button
-                                onClick={handleAddGallery}
-                                className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                onClick={editingGalleryId ? handleUpdateGallery : handleAddGallery}
+                                className="mt-6 flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-cyan-500/20 active:scale-95 w-full md:w-auto"
                             >
-                                <Plus size={20} />
-                                Add Gallery Item
+                                {editingGalleryId ? <Save size={20} /> : <Plus size={20} />}
+                                {editingGalleryId ? 'Update Item' : 'Add Gallery Item'}
                             </button>
                         </motion.div>
 
-                        {/* Recent Gallery Items */}
-                        <div>
-                            <h3 className="text-xl font-bold text-white mb-4">Recent Gallery Items</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {galleryItems.slice(0, 6).map((item) => (
-                                    <div
-                                        key={item._id}
-                                        className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
-                                    >
-                                        <div className="h-48 bg-gray-900 flex items-center justify-center relative group">
-                                            {item.image ? (
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                            ) : (
-                                                <ImageIcon className="text-white/20" size={48} />
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </div>
-                                        <div className="p-4">
-                                            <span className="text-xs font-bold text-cyan-400">{item.category}</span>
-                                            <h4 className="text-lg font-bold text-white mt-1">{item.title}</h4>
-                                            <p className="text-white/60 text-sm mt-2 line-clamp-2">{item.description}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {galleryItems.map((item) => (
+                                <div key={item._id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden relative">
+                                    <div className="h-48 relative overflow-hidden">
+                                        {item.image ? (
+                                            <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-900 flex items-center justify-center"><ImageIcon className="text-white/10" size={48} /></div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                                        
+                                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+                                            <button onClick={() => handleEditGallery(item)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all border border-white/10 shadow-xl"><Edit size={16} /></button>
+                                            <button onClick={() => handleDeleteGallery(item._id)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10 shadow-xl"><Trash2 size={16} /></button>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="p-4">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400/60">{item.category}</span>
+                                        <h4 className="text-white font-bold text-lg mt-1">{item.title}</h4>
+                                        <p className="text-white/40 text-xs mt-2 line-clamp-2">{item.description}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
@@ -466,15 +551,30 @@ export default function MemberDashboard() {
                 {/* Team Tab */}
                 {activeTab === "team" && (
                     <div className="space-y-6">
-                        {/* Add Form */}
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/5 border border-white/10 rounded-xl p-6"
+                            className="bg-white/5 border border-cyan-500/30 rounded-xl p-6 shadow-[0_0_20px_rgba(34,211,238,0.05)]"
                         >
-                            <h3 className="text-xl font-bold text-white mb-4">Add New Team Member</h3>
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <Users className="text-cyan-400" size={20} />
+                                    {editingTeamId ? 'Update Team Member' : 'Add New Team Member'}
+                                </h3>
+                                {editingTeamId && (
+                                    <button
+                                        onClick={() => {
+                                            setEditingTeamId(null);
+                                            setTeamForm({ name: "", role: "", department: "", year: "", image: "" });
+                                        }}
+                                        className="text-white/40 hover:text-white transition-colors"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Name</label>
                                     <input
@@ -485,30 +585,16 @@ export default function MemberDashboard() {
                                         placeholder="Full name"
                                     />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Role</label>
-                                    <select
+                                    <input
+                                        type="text"
                                         value={teamForm.role}
                                         onChange={(e) => setTeamForm({ ...teamForm, role: e.target.value })}
-                                        className="w-full bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-cyan-500/30 hover:border-cyan-500/60 focus:border-cyan-500 rounded-lg px-4 py-3 text-white focus:outline-none transition-all cursor-pointer"
-                                    >
-                                        <option value="" className="bg-gray-900">Select Role</option>
-                                        <option value="Chairperson" className="bg-gray-900">Chairperson</option>
-                                        <option value="Vice Chairperson" className="bg-gray-900">Vice Chairperson</option>
-                                        <option value="Secretary" className="bg-gray-900">Secretary</option>
-                                        <option value="Treasurer" className="bg-gray-900">Treasurer</option>
-                                        <option value="Technical Head" className="bg-gray-900">Technical Head</option>
-                                        <option value="Event Coordinator" className="bg-gray-900">Event Coordinator</option>
-                                        <option value="Web Development Lead" className="bg-gray-900">Web Development Lead</option>
-                                        <option value="Core Team Member" className="bg-gray-900">Core Team Member</option>
-                                        <option value="Public Relations" className="bg-gray-900">Public Relations</option>
-                                        <option value="Research Coordinator" className="bg-gray-900">Research Coordinator</option>
-                                        <option value="Design Head" className="bg-gray-900">Design Head</option>
-                                        <option value="Marketing Head" className="bg-gray-900">Marketing Head</option>
-                                    </select>
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                                        placeholder="e.g. Technical Lead"
+                                    />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Department</label>
                                     <input
@@ -516,10 +602,9 @@ export default function MemberDashboard() {
                                         value={teamForm.department}
                                         onChange={(e) => setTeamForm({ ...teamForm, department: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
-                                        placeholder="ECE, CSE, etc."
+                                        placeholder="e.g. ECE"
                                     />
                                 </div>
-
                                 <div>
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Year</label>
                                     <input
@@ -527,15 +612,11 @@ export default function MemberDashboard() {
                                         value={teamForm.year}
                                         onChange={(e) => setTeamForm({ ...teamForm, year: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
-                                        placeholder="Final Year, Third Year, etc."
+                                        placeholder="e.g. Third Year"
                                     />
                                 </div>
-
-
-                                <div className="col-span-2">
+                                <div className="col-span-1 md:col-span-2">
                                     <label className="block text-sm font-bold text-cyan-400 mb-2">Profile Photo</label>
-
-                                    {/* File Upload Button */}
                                     <div className="flex items-center gap-4 mb-3">
                                         <input
                                             type="file"
@@ -547,98 +628,66 @@ export default function MemberDashboard() {
                                         />
                                         <label
                                             htmlFor="team-photo-upload"
-                                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-colors cursor-pointer ${isUploadingTeamImage
-                                                ? 'bg-gray-600 cursor-not-allowed'
-                                                : 'bg-cyan-600 hover:bg-cyan-500'
-                                                } text-white`}
+                                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-colors cursor-pointer ${isUploadingTeamImage ? 'bg-gray-600 pointer-events-none' : 'bg-cyan-600 hover:bg-cyan-500'} text-white`}
                                         >
                                             <Upload size={20} />
                                             {isUploadingTeamImage ? 'Uploading...' : 'Choose Photo'}
                                         </label>
-
-                                        {/* Image Preview */}
                                         {teamForm.image && (
                                             <div className="flex items-center gap-3">
-                                                <img
-                                                    src={teamForm.image}
-                                                    alt="Preview"
-                                                    className="w-16 h-16 rounded-full object-cover border-2 border-cyan-500"
-                                                />
-                                                <button
-                                                    onClick={() => setTeamForm({ ...teamForm, image: "" })}
-                                                    className="text-red-400 hover:text-red-300 transition-colors"
-                                                    type="button"
-                                                    title="Remove image"
-                                                >
-                                                    <X size={20} />
-                                                </button>
+                                                <img src={teamForm.image} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-cyan-500" />
+                                                <button onClick={() => setTeamForm({ ...teamForm, image: "" })} className="text-red-400 hover:text-red-300"><X size={18} /></button>
                                             </div>
                                         )}
                                     </div>
-
-                                    {/* Optional URL Input */}
-                                    <div>
-                                        <p className="text-white/40 text-xs mb-2">Or paste image URL:</p>
-                                        <input
-                                            type="text"
-                                            value={teamForm.image}
-                                            onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
-                                            placeholder="https://example.com/photo.jpg"
-                                        />
-                                    </div>
+                                    <input
+                                        type="text"
+                                        value={teamForm.image}
+                                        onChange={(e) => setTeamForm({ ...teamForm, image: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
+                                        placeholder="Or paste image URL"
+                                    />
                                 </div>
-
                             </div>
 
                             <button
-                                onClick={handleAddTeam}
-                                className="mt-4 flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-bold transition-colors"
+                                onClick={editingTeamId ? handleUpdateTeam : handleAddTeam}
+                                className="mt-6 flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-cyan-500/20 active:scale-95 w-full md:w-auto"
                             >
-                                <Plus size={20} />
-                                Add Team Member
+                                {editingTeamId ? <Save size={20} /> : <Plus size={20} />}
+                                {editingTeamId ? 'Update Member' : 'Add Team Member'}
                             </button>
                         </motion.div>
 
-                        {/* Recent Team Members */}
-                        <div>
-                            <h3 className="text-xl font-bold text-white mb-4">Recent Team Members</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {teamMembers.slice(0, 6).map((member) => (
-                                    <div
-                                        key={member._id}
-                                        className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
-                                    >
-                                        <div className="h-56 bg-gray-900 flex items-center justify-center relative group">
-                                            {member.image ? (
-                                                <img
-                                                    src={member.image}
-                                                    alt={member.name}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                            ) : (
-                                                <Users className="text-white/20" size={48} />
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </div>
-                                        <div className="p-4">
-                                            <h4 className="text-lg font-bold text-white">{member.name}</h4>
-                                            <p className="text-cyan-400 text-sm font-bold mt-1">{member.role}</p>
-                                            <p className="text-white/60 text-sm mt-2">
-                                                {member.department} • {member.year}
-                                            </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {teamMembers.map((member) => (
+                                <div key={member._id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden relative">
+                                    <div className="h-56 relative overflow-hidden">
+                                        {member.image ? (
+                                            <img src={member.image} alt={member.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-900 flex items-center justify-center"><Users className="text-white/10" size={48} /></div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                                        
+                                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
+                                            <button onClick={() => handleEditTeam(member)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all border border-white/10 shadow-xl"><Edit size={16} /></button>
+                                            <button onClick={() => handleDeleteTeam(member._id)} className="p-2 bg-white/10 backdrop-blur-md rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10 shadow-xl"><Trash2 size={16} /></button>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="p-4">
+                                        <h4 className="text-white font-bold text-lg">{member.name}</h4>
+                                        <p className="text-cyan-400 text-xs font-black uppercase tracking-widest mt-1">{member.role}</p>
+                                        <p className="text-white/40 text-[10px] mt-2 font-bold uppercase tracking-tighter">{member.department} • {member.year}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
 
                 {/* Messages Tab */}
-                {activeTab === "messages" && (
-                    <ContactMessages />
-                )}
+                {activeTab === "messages" && <ContactMessages />}
             </div>
         </div>
     );

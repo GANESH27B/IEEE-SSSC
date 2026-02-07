@@ -105,10 +105,6 @@ export default function MemberSessionsPage() {
     };
 
     const handleEdit = (session: any) => {
-        if (session.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only edit your own submissions');
-            return;
-        }
         setEditingId(session._id);
         setForm({
             title: session.title,
@@ -148,10 +144,6 @@ export default function MemberSessionsPage() {
     };
 
     const handleDelete = async (session: any) => {
-        if (session.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only delete your own submissions');
-            return;
-        }
         if (confirm('Are you sure you want to delete this session?')) {
             try {
                 const res = await fetch(`/api/sessions/${session._id}`, { method: 'DELETE' });
@@ -365,7 +357,7 @@ export default function MemberSessionsPage() {
 
                 {/* Sessions List */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {sessions.filter(s => s.createdBy === memberData?.email).map((session) => (
+                    {sessions.map((session) => (
                         <motion.div
                             key={session._id}
                             layout
@@ -398,7 +390,7 @@ export default function MemberSessionsPage() {
                     ))}
                 </div>
 
-                {sessions.filter(s => s.createdBy === memberData?.email).length === 0 && (
+                {sessions.length === 0 && (
                     <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/5 mt-10">
                         <p className="text-white/40 font-bold uppercase tracking-widest text-xs">No active sessions created by you</p>
                     </div>

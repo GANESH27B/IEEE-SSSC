@@ -176,13 +176,12 @@ export default function LoginPage() {
                         <div className="space-y-3">
                             <label className="text-xs font-bold text-cyan-500 tracking-[0.2em] uppercase ml-1">Email Address</label>
                             <div className="relative group">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-cyan-400 transition-colors" size={20} />
                                 <input
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
-                                    placeholder={isAdmin ? "admin@ieee.org" : "member@ieee.org"}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white placeholder:text-white/40 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
+                                    placeholder={isAdmin ? "admin.access@ieee.org" : "your.email@ieee.org"}
                                     required
                                 />
                             </div>
@@ -196,13 +195,12 @@ export default function LoginPage() {
                                 )}
                             </div>
                             <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-cyan-400 transition-colors" size={20} />
                                 <input
                                     type="password"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
-                                    placeholder="••••••••"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white placeholder:text-white/40 focus:outline-none focus:border-cyan-500 focus:bg-cyan-950/10 transition-all font-medium"
+                                    placeholder="Enter secure password"
                                     required
                                 />
                             </div>

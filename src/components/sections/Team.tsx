@@ -38,20 +38,28 @@ export function Team() {
         return acc;
     }, {});
 
+    // Sort members within each group: Core > Lead > Regular
+    Object.keys(groupedTeam).forEach(role => {
+        groupedTeam[role].sort((a: any, b: any) => {
+            // Priority: Core (2) + Lead (1)
+            const scoreA = (a.isCore ? 2 : 0) + (a.isLead ? 1 : 0);
+            const scoreB = (b.isCore ? 2 : 0) + (b.isLead ? 1 : 0);
+            return scoreB - scoreA;
+        });
+    });
+
     // Define role order for display
     const roleOrder = [
         'Chairperson',
         'Vice Chairperson',
         'Secretary',
-        'Treasurer',
         'Technical Head',
         'Event Coordinator',
         'Web Development Lead',
         'Core Team Member',
         'Public Relations',
         'Research Coordinator',
-        'Design Head',
-        'Marketing Head'
+
     ];
 
     const roles = Object.keys(groupedTeam).sort((a, b) => {
@@ -138,7 +146,15 @@ export function Team() {
                                             className="group relative"
                                         >
                                             {/* Hexagonal Card Container */}
-                                            <div className="relative bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] rounded-lg overflow-hidden">
+                                            {/* Hexagonal Card Container */}
+                                            <div className={`relative rounded-lg overflow-hidden transition-all duration-500 group
+                                                ${member.isCore
+                                                    ? "bg-gradient-to-br from-[#2a1a3e] to-[#1a1033] border border-purple-500/50 shadow-[0_0_30px_rgba(168,85,247,0.2)] hover:shadow-[0_0_50px_rgba(168,85,247,0.4)] hover:border-purple-400"
+                                                    : member.isLead
+                                                        ? "bg-gradient-to-br from-[#2e2a1a] to-[#1e1e0f] border border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.2)] hover:shadow-[0_0_50px_rgba(234,179,8,0.4)] hover:border-yellow-400"
+                                                        : "bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] border border-transparent"
+                                                }
+                                            `}>
                                                 {/* Animated Border */}
                                                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/50 via-blue-500/50 to-purple-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
 
@@ -147,6 +163,23 @@ export function Team() {
                                                 <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-cyan-500/50 group-hover:border-cyan-400 transition-colors"></div>
                                                 <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-cyan-500/50 group-hover:border-cyan-400 transition-colors"></div>
                                                 <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-cyan-500/50 group-hover:border-cyan-400 transition-colors"></div>
+
+                                                {/* Lead Star Tag */}
+                                                {/* Hanging Status Tabs */}
+                                                <div className="absolute top-0 right-6 z-20 flex gap-2">
+                                                    {member.isCore && (
+                                                        <div className="bg-purple-600 text-white pb-2 pt-4 px-2 rounded-b-sm shadow-[0_0_15px_rgba(168,85,247,0.6)] flex flex-col items-center border-x border-b border-purple-400/30 -mt-2 group-hover:mt-0 transition-all duration-300">
+                                                            <span className="text-xs mb-0.5">🛡️</span>
+                                                            <span className="text-[8px] font-black tracking-widest uppercase writing-mode-vertical">CORE</span>
+                                                        </div>
+                                                    )}
+                                                    {member.isLead && (
+                                                        <div className="bg-yellow-500 text-black pb-2 pt-4 px-2 rounded-b-sm shadow-[0_0_15px_rgba(234,179,8,0.6)] flex flex-col items-center border-x border-b border-yellow-400/30 -mt-2 group-hover:mt-0 transition-all duration-300">
+                                                            <span className="text-xs mb-0.5">⭐</span>
+                                                            <span className="text-[8px] font-black tracking-widest uppercase">LEAD</span>
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 {/* Content */}
                                                 <div className="relative p-6 flex flex-col items-center text-center">
@@ -183,13 +216,6 @@ export function Team() {
                                                     <p className="text-cyan-400 text-sm font-bold tracking-widest uppercase mb-3 group-hover:text-yellow-400 transition-colors">
                                                         {member.role}
                                                     </p>
-
-                                                    {/* Year Info */}
-                                                    <div className="w-full px-4 py-2 bg-black/30 rounded border border-cyan-500/20 group-hover:border-cyan-400/50 transition-colors mb-4">
-                                                        <p className="text-white/60 text-xs uppercase tracking-wider">
-                                                            {member.year}
-                                                        </p>
-                                                    </div>
 
                                                     {/* Contact Info (if available) */}
                                                     {member.email && (

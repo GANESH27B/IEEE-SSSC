@@ -108,10 +108,6 @@ export default function MemberWorkshopsPage() {
     };
 
     const handleEdit = (workshop: any) => {
-        if (workshop.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only edit your own submissions');
-            return;
-        }
         setEditingId(workshop._id);
         setForm({
             title: workshop.title,
@@ -151,10 +147,6 @@ export default function MemberWorkshopsPage() {
     };
 
     const handleDelete = async (workshop: any) => {
-        if (workshop.createdBy !== memberData.email && memberData.role !== 'admin') {
-            alert('You can only delete your own submissions');
-            return;
-        }
         if (confirm('Are you sure you want to delete this submission?')) {
             try {
                 const res = await fetch(`/api/workshops/${workshop._id}`, { method: 'DELETE' });
@@ -397,11 +389,10 @@ export default function MemberWorkshopsPage() {
                     </motion.div>
                 )}
 
-                {/* Workshops List */}
                 <div className="space-y-6">
-                    <h3 className="text-white/60 text-sm font-bold uppercase tracking-widest ml-1 mb-4">Your Recent Contributions</h3>
+                    <h3 className="text-white/60 text-sm font-bold uppercase tracking-widest ml-1 mb-4">Operational Workshop Registry</h3>
                     <div className="grid grid-cols-1 gap-6">
-                        {workshops.filter(w => w.createdBy === memberData?.email).map((workshop) => (
+                        {workshops.map((workshop) => (
                             <motion.div
                                 key={workshop._id}
                                 layout
@@ -470,7 +461,7 @@ export default function MemberWorkshopsPage() {
                     </div>
                 </div>
 
-                {workshops.filter(w => w.createdBy === memberData?.email).length === 0 && (
+                {workshops.length === 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

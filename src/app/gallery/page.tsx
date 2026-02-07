@@ -60,81 +60,121 @@ export default function GalleryPage() {
                 ) : (
                     /* Gallery Grid */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {galleryItems.map((item, index) => (
-                            <motion.div
-                                key={item._id}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1, duration: 0.8 }}
-                                className="group relative"
-                            >
-                                {/* Technical Clipped Shape Container */}
-                                <div
-                                    className="relative bg-white/[0.02] backdrop-blur-xl overflow-hidden border border-white/10 hover:border-cyan-500/50 transition-all duration-500"
-                                    style={{
-                                        clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)"
-                                    }}
+                        {galleryItems.map((item, index) => {
+                            // Determine color scheme based on category
+                            let colors = {
+                                border: "hover:border-cyan-500/50",
+                                text: "text-cyan-400",
+                                groupText: "group-hover:text-cyan-400",
+                                dot: "bg-cyan-500",
+                                button: "bg-cyan-500",
+                                borderFrame: "group-hover:border-cyan-500/50"
+                            };
+
+                            if (item.category === "Workshop") {
+                                colors = {
+                                    border: "hover:border-purple-500/50",
+                                    text: "text-purple-400",
+                                    groupText: "group-hover:text-purple-400",
+                                    dot: "bg-purple-500",
+                                    button: "bg-purple-500",
+                                    borderFrame: "group-hover:border-purple-500/50"
+                                };
+                            } else if (item.category === "Competition") {
+                                colors = {
+                                    border: "hover:border-yellow-500/50",
+                                    text: "text-yellow-400",
+                                    groupText: "group-hover:text-yellow-400",
+                                    dot: "bg-yellow-500",
+                                    button: "bg-yellow-500",
+                                    borderFrame: "group-hover:border-yellow-500/50"
+                                };
+                            } else if (item.category === "Lecture") {
+                                colors = {
+                                    border: "hover:border-emerald-500/50",
+                                    text: "text-emerald-400",
+                                    groupText: "group-hover:text-emerald-400",
+                                    dot: "bg-emerald-500",
+                                    button: "bg-emerald-500",
+                                    borderFrame: "group-hover:border-emerald-500/50"
+                                };
+                            }
+
+                            return (
+                                <motion.div
+                                    key={item._id}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                                    className="group h-full"
                                 >
-                                    {/* Image Container */}
-                                    <div className="relative h-72 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                                        {item.image ? (
-                                            <Image
-                                                src={item.image}
-                                                alt={item.title}
-                                                fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                                unoptimized
-                                            />
-                                        ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <div className="w-20 h-20 border-4 border-white/10 rounded-lg flex items-center justify-center">
-                                                    <svg className="w-10 h-10 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
+                                    <div className={`
+                                        h-full flex flex-col
+                                        relative bg-white/5 backdrop-blur-md 
+                                        rounded-3xl overflow-hidden 
+                                        border border-white/10 ${colors.border}
+                                        hover:bg-white/10 
+                                        transition-all duration-500 ease-out
+                                        hover:shadow-2xl hover:shadow-${colors.dot.split('-')[1]}-500/20
+                                        hover:-translate-y-2
+                                    `}>
+                                        {/* Image Container */}
+                                        <div className="relative h-64 overflow-hidden">
+                                            {item.image ? (
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    unoptimized
+                                                />
+                                            ) : (
+                                                <div className={`absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center`}>
+                                                    <div className={`w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10`}>
+                                                        <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                            
+                                            {/* Gradient Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 
-                                        {/* Overlay on hover */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-
-                                        {/* View Badge */}
-                                        <button
-                                            onClick={() => setSelectedImage(item)}
-                                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-cyan-500 text-black rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-75 group-hover:scale-100"
-                                        >
-                                            <Eye size={24} />
-                                        </button>
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="p-8">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                                            <span className="text-[10px] font-black text-cyan-400 tracking-[0.2em] uppercase">
+                                            {/* Category Badge (Floating) */}
+                                            <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-black/50 backdrop-blur-md border border-white/10 ${colors.text} ${colors.border}`}>
                                                 {item.category}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-white mb-3 font-[var(--font-orbitron)] leading-tight group-hover:text-cyan-400 transition-colors">
-                                            {item.title}
-                                        </h3>
-                                        <p className="text-white text-sm mb-4 line-clamp-2 leading-relaxed font-light opacity-80">
-                                            {item.description}
-                                        </p>
-                                    </div>
-                                </div>
+                                            </div>
 
-                                {/* Glowing Shape Border (The "Frame") */}
-                                <div
-                                    className="absolute inset-0 border border-cyan-500/0 group-hover:border-cyan-500/50 transition-all duration-500 pointer-events-none -z-10"
-                                    style={{
-                                        clipPath: "polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%)",
-                                        padding: "1px"
-                                    }}
-                                />
-                            </motion.div>
-                        ))}
+                                            {/* View Button (Centered) */}
+                                            <button
+                                                onClick={() => setSelectedImage(item)}
+                                                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 ${colors.button} text-black rounded-full flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-lg shadow-black/50`}
+                                            >
+                                                <Eye size={24} />
+                                            </button>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="p-6 flex-grow flex flex-col justify-between">
+                                            <div>
+                                                <h3 className={`text-xl font-bold text-white mb-2 font-[var(--font-orbitron)] leading-tight ${colors.groupText} transition-colors`}>
+                                                    {item.title}
+                                                </h3>
+                                                <p className="text-white/60 text-sm line-clamp-2 leading-relaxed font-light">
+                                                    {item.description}
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-white/40 font-mono">
+                                                <span>IEEE SSCS</span>
+                                                <span className={`${colors.text} opacity-0 group-hover:opacity-100 transition-opacity`}>View Details →</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 )}
             </div>

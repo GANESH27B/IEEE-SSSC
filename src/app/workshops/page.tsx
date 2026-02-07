@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Calendar, Clock, MapPin, Users, ChevronRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { TechBackground } from "@/components/ui/TechBackground";
 
 export default function WorkshopsPage() {
     const [workshops, setWorkshops] = useState<any[]>([]);
@@ -30,17 +31,10 @@ export default function WorkshopsPage() {
     };
 
     return (
-        <div className="relative min-h-screen bg-black pt-32 pb-20 overflow-hidden">
-            {/* Background Image with Cyber Overlay */}
+        <div className="relative min-h-screen bg-transparent pt-32 pb-20 overflow-hidden">
+            {/* Animated Tech Background */}
             <div className="fixed inset-0 z-0">
-                <Image
-                    src="/images/workshop-bg.png"
-                    alt="Workshop Background"
-                    fill
-                    className="object-cover opacity-100"
-                    priority
-                />
-                <div className="absolute inset-0 bg-black/40" />
+                <TechBackground />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">

@@ -13,10 +13,7 @@ const TeamMemberSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    year: {
-        type: String,
-        required: true,
-    },
+
     image: {
         type: String,
         required: true,
@@ -28,6 +25,14 @@ const TeamMemberSchema = new mongoose.Schema({
     github: {
         type: String,
         default: '',
+    },
+    isLead: {
+        type: Boolean,
+        default: false,
+    },
+    isCore: {
+        type: Boolean,
+        default: false,
     },
     createdAt: {
         type: Date,

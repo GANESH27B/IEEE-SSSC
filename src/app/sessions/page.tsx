@@ -1,36 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { Calendar, Clock, MapPin, Users, Video, Code, Zap, ChevronRight, Sparkles } from "lucide-react";
+import { InteractiveSessionBg } from "@/components/ui/InteractiveSessionBg";
 
 export default function InteractiveSessionsPage() {
     const [sessions, setSessions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<string>("All");
     const types = ["All", "Live Coding", "Workshop", "Demo", "Challenge"];
-
-    // Mouse Tracking Logic for Interactive Background
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-    const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-
-    const bgX = useTransform(springX, [0, 1920], [-20, 20]);
-    const bgY = useTransform(springY, [0, 1080], [-20, 20]);
-    const glowX = useTransform(springX, [0, 1920], ["40%", "60%"]);
-    const glowY = useTransform(springY, [0, 1080], ["40%", "60%"]);
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            mouseX.set(e.clientX);
-            mouseY.set(e.clientY);
-        };
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [mouseX, mouseY]);
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -54,42 +34,10 @@ export default function InteractiveSessionsPage() {
         : sessions.filter((s: any) => s.type === filter);
 
     return (
-        <div className="relative min-h-screen bg-black pt-32 pb-20 overflow-hidden text-white">
-            {/* Interactive Background System */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                {/* Parallax Base Image */}
-                <motion.div
-                    style={{ x: bgX, y: bgY, scale: 1.1 }}
-                    className="relative w-full h-full"
-                >
-                    <Image
-                        src="/images/sessions-bg.png"
-                        alt="Background"
-                        fill
-                        className="object-cover opacity-80"
-                        priority
-                    />
-                </motion.div>
-
-                {/* Dynamic Mouse Glow */}
-                <motion.div
-                    style={{
-                        left: glowX,
-                        top: glowY,
-                    }}
-                    className="absolute w-[800px] h-[800px] -translate-x-1/2 -translate-y-1/2 bg-cyan-500/20 blur-[120px] rounded-full"
-                />
-
-                {/* Atmospheric Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
-                <div className="absolute inset-0 bg-black/20" />
-
-                {/* Scanning Line Effect */}
-                <motion.div
-                    animate={{ y: ["0%", "100%", "0%"] }}
-                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent h-1 w-full"
-                />
+        <div className="relative min-h-screen bg-transparent pt-32 pb-20 overflow-hidden text-white">
+            {/* Interactive Animated Background */}
+            <div className="fixed inset-0 z-0">
+                <InteractiveSessionBg />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">

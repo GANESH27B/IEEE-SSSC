@@ -1,33 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { Calendar, Clock, MapPin, Users, Award, Briefcase, GraduationCap, ChevronRight, Linkedin, Globe, Sparkles } from "lucide-react";
+import { LectureBackground } from "@/components/ui/LectureBackground";
 
 export default function GuestLecturesPage() {
     const [lectures, setLectures] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedLecture, setSelectedLecture] = useState<any | null>(null);
-
-    // Mouse Tracking Logic
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-    const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-
-    const bgX = useTransform(springX, [0, 1920], [-15, 15]);
-    const bgY = useTransform(springY, [0, 1080], [-15, 15]);
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            mouseX.set(e.clientX);
-            mouseY.set(e.clientY);
-        };
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [mouseX, mouseY]);
 
     useEffect(() => {
         const fetchLectures = async () => {
@@ -47,25 +29,10 @@ export default function GuestLecturesPage() {
     }, []);
 
     return (
-        <div className="relative min-h-screen bg-black pt-32 pb-20 overflow-hidden text-white">
-            {/* Clear Interactive Background */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <motion.div
-                    style={{ x: bgX, y: bgY, scale: 1.05 }}
-                    className="relative w-full h-full"
-                >
-                    <Image
-                        src="/images/lectures-bg.png"
-                        alt="Background"
-                        fill
-                        className="object-cover opacity-80"
-                        priority
-                    />
-                </motion.div>
-
-                {/* Advanced Light Overlays for Clarity */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
-                <div className="absolute inset-0 bg-black/20" />
+        <div className="relative min-h-screen bg-transparent pt-32 pb-20 overflow-hidden text-white">
+            {/* Animated Lecture Background */}
+            <div className="fixed inset-0 z-0">
+                <LectureBackground />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">

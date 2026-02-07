@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MessageSquare, Send, CheckCircle, ArrowRight } from "lucide-react";
-import { RotatingBlocks } from "@/components/ui/RotatingBlocks";
+import { StarField } from "@/components/ui/StarField";
 
 export default function ContactPage() {
     const [form, setForm] = useState({
@@ -37,10 +37,10 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="relative min-h-screen bg-black pt-32 pb-20 overflow-hidden text-white perspective-[2000px]">
-            {/* 3D Background */}
-            <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
-                <RotatingBlocks />
+        <div className="relative min-h-screen bg-transparent pt-32 pb-20 overflow-hidden text-white perspective-[2000px]">
+            {/* Space Background with Moving Stars */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <StarField />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">

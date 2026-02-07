@@ -1,130 +1,96 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Target, Users, Globe, Cpu, Zap } from "lucide-react";
-import { RotatingBlocks } from "@/components/ui/RotatingBlocks";
+import { Cpu, Target, Globe, GraduationCap, Users, Rocket } from "lucide-react";
+import { StarField } from "@/components/ui/StarField";
 
 export default function AboutPage() {
+    const aboutItems = [
+        {
+            icon: <Cpu className="w-8 h-8 text-cyan-400" />,
+            title: "Main Areas of Focus",
+            description: "SSCS covers analog, digital, mixed-signal, and RF integrated circuits, VLSI design, low-power and high-speed circuits, system-on-chip (SoC), semiconductor devices, and emerging hardware for AI and communication systems."
+        },
+        {
+            icon: <Target className="w-8 h-8 text-purple-400" />,
+            title: "What Does SSCS Do?",
+            description: "SSCS promotes research, education, and professional growth by organizing technical events, publishing high-quality journals, supporting conferences, and connecting students with researchers and industry experts worldwide."
+        },
+        {
+            icon: <Globe className="w-8 h-8 text-blue-400" />,
+            title: "Conferences & Events",
+            description: "SSCS sponsors leading international conferences such as the International Solid-State Circuits Conference (ISSCC), VLSI Symposium, and Asian Solid-State Circuits Conference (A-SSCC), providing platforms to present and learn about advanced IC technologies."
+        },
+        {
+            icon: <GraduationCap className="w-8 h-8 text-pink-400" />,
+            title: "Student Benefits",
+            description: "Students gain access to technical workshops, expert lectures, research resources, networking opportunities, career guidance, and exposure to real-world integrated circuit design and semiconductor industry trends."
+        },
+        {
+            icon: <Users className="w-8 h-8 text-yellow-400" />,
+            title: "SSCS Student Chapters",
+            description: "SSCS Student Chapters in colleges organize seminars, hands-on training, industrial talks, technical competitions, and collaborative activities that enhance students' technical skills and research interests."
+        },
+        {
+            icon: <Rocket className="w-8 h-8 text-red-400" />,
+            title: "Why Join SSCS?",
+            description: "Joining SSCS helps students and professionals build strong foundations in IC design, stay updated with emerging technologies, connect with industry leaders, and prepare for careers in VLSI, embedded systems, and semiconductor industries."
+        }
+    ];
+
     return (
-        <div className="relative min-h-screen bg-black pt-32 pb-20 overflow-hidden text-white perspective-[2000px]">
-            {/* 3D Background Layer */}
-            <div className="fixed inset-0 z-0 pointer-events-none opacity-50">
-                <RotatingBlocks />
+        <div className="relative min-h-screen bg-transparent pt-32 pb-20 overflow-hidden text-white perspective-[2000px]">
+            {/* Space Background with Moving Stars */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <StarField />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
-                {/* Hero Header */}
-                <div className="max-w-4xl mb-32">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-cyan-400 font-bold tracking-[0.4em] text-[10px] uppercase mb-6 flex items-center gap-3"
-                    >
-                        <Shield size={14} />
-                        Architecting Innovation Since inception
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 30 }}
+                {/* Intro Section */}
+                <div className="text-center mb-20 max-w-4xl mx-auto">
+                    <motion.h3
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-6xl md:text-8xl font-black text-white font-[var(--font-orbitron)] leading-none mb-10 tracking-tighter"
+                        transition={{ delay: 0.1 }}
+                        className="text-3xl md:text-5xl font-black text-white font-[var(--font-orbitron)] uppercase mb-8 leading-relaxed tracking-wide"
                     >
-                        THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-400 to-white/40">GENESIS</span>
-                    </motion.h1>
-
+                        What is <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">IEEE Solid-State Circuits Society (SSCS)?</span>
+                    </motion.h3>
                     <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-white text-xl font-light leading-relaxed max-w-2xl opacity-80"
+                        className="text-lg md:text-xl text-white/70 leading-relaxed"
                     >
-                        The IEEE Solid-State Circuits Society Student Chapter is a bastion of technical excellence, dedicated to the mastery of integrated circuits and semiconductor technology.
+                        IEEE Solid-State Circuits Society (SSCS) is a technical society under IEEE that focuses on the design, development, and application of solid-state and integrated circuits. It supports innovation and knowledge sharing in microelectronics and semiconductor technologies.
                     </motion.p>
                 </div>
 
-                {/* Core Pillars */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32">
-                    {[
-                        {
-                            icon: <Target className="text-cyan-400" size={32} />,
-                            title: "OUR MISSION",
-                            content: "To empower students with deep technical knowledge in chip design and analog/digital circuits through rigorous hands-on experimentation."
-                        },
-                        {
-                            icon: <Globe className="text-emerald-400" size={32} />,
-                            title: "OUR VISION",
-                            content: "Leading the global student community in SSCS by bridging the gap between theoretical physics and practical silicon implementations."
-                        },
-                        {
-                            icon: <Users className="text-purple-400" size={32} />,
-                            title: "OUR COMMUNITY",
-                            content: "A high-performance network of engineers, researchers, and innovators committed to mutual growth and industry-standard expertise."
-                        }
-                    ].map((pillar, i) => (
+                {/* Content Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {aboutItems.map((item, index) => (
                         <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="p-10 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-cyan-500/30 transition-all group"
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ delay: index * 0.1, duration: 0.5 }}
+                            whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                            className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/30 transition-all group h-full backdrop-blur-sm"
                         >
-                            <div className="mb-6 opacity-60 group-hover:opacity-100 transition-opacity">
-                                {pillar.icon}
+                            <div className="mb-6 p-4 rounded-xl bg-black/40 border border-white/5 w-fit group-hover:scale-110 group-hover:border-cyan-500/50 transition-all duration-300">
+                                {item.icon}
                             </div>
-                            <h3 className="text-xl font-bold mb-4 font-[var(--font-orbitron)] tracking-widest text-white/80 group-hover:text-white transition-colors">
-                                {pillar.title}
+                            <h3 className="text-xl font-bold text-white mb-4 font-[var(--font-orbitron)] group-hover:text-cyan-400 transition-colors">
+                                {item.title}
                             </h3>
-                            <p className="text-sm text-white font-light leading-relaxed italic opacity-80">
-                                "{pillar.content}"
+                            <p className="text-white/60 text-sm leading-relaxed group-hover:text-white/80 transition-colors">
+                                {item.description}
                             </p>
                         </motion.div>
                     ))}
                 </div>
-
-                {/* Technical Heritage */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        className="relative p-12 rounded-[60px] bg-gradient-to-br from-cyan-500/10 via-transparent to-transparent border border-white/5 overflow-hidden"
-                    >
-                        <div className="absolute top-0 right-0 p-8">
-                            <Cpu className="text-cyan-400/20 w-32 h-32" />
-                        </div>
-                        <h2 className="text-4xl font-black mb-8 font-[var(--font-orbitron)]">TECHNICAL <span className="text-cyan-400">FOUNDRY</span></h2>
-                        <ul className="space-y-6">
-                            {[
-                                "Advanced CMOS VLSI Design Workshops",
-                                "Analog Integrated Circuit Analysis",
-                                "Digital System Verification Laboratory",
-                                "Semiconductor Device Physics Research",
-                                "Industrial Grade EDA Tool Training"
-                            ].map((item, i) => (
-                                <li key={i} className="flex items-center gap-4 text-white font-light opacity-80">
-                                    <Zap size={14} className="text-cyan-500" />
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
-                    </motion.div>
-
-                    <div className="space-y-8">
-                        <h2 className="text-5xl font-black font-[var(--font-orbitron)] tracking-tighter">WHY WE <span className="text-emerald-500">EXCEL</span></h2>
-                        <p className="text-white leading-relaxed font-light text-lg opacity-80">
-                            We don't just study circuits; we architect the future. Our chapter is built on the philosophy that true understanding comes from building. From initial schematics to finalized layouts, our members are equipped with the precision and discipline required by the global semiconductor industry.
-                        </p>
-                        <div className="flex gap-4">
-                            <div className="px-6 py-2 rounded-full border border-cyan-500/30 text-[10px] font-black tracking-widest uppercase text-white">Industry Standard</div>
-                            <div className="px-6 py-2 rounded-full border border-cyan-500/30 text-[10px] font-black tracking-widest uppercase text-white">Hands-on Mastery</div>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            {/* Background Atmosphere */}
-            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
         </div>
     );
 }
-
