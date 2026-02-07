@@ -271,7 +271,6 @@ export default function AdminDashboard() {
             name: member.name,
             role: member.role,
             department: member.department,
-            department: member.department,
             image: member.image,
             linkedin: member.linkedin || "",
             github: member.github || "",
