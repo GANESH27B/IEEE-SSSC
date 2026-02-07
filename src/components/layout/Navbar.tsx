@@ -103,7 +103,7 @@ export function Navbar() {
 
                     <div className="w-px h-6 bg-white/20 mx-2"></div>
 
-                   
+
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -149,13 +149,7 @@ export function Navbar() {
                                 )}
                             </div>
                         ))}
-                        <Link
-                            href="/login"
-                            onClick={() => setIsOpen(false)}
-                            className="text-xl font-bold uppercase tracking-widest text-white hover:text-red-500 transition-colors font-[var(--font-orbitron)] pt-4"
-                        >
-                            LOG IN
-                        </Link>
+
                     </motion.div>
                 )}
             </AnimatePresence>

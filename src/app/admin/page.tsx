@@ -54,11 +54,9 @@ export default function AdminDashboard() {
     });
 
     // Team form
-    // Team form
     const [teamForm, setTeamForm] = useState({
         name: "",
         role: "",
-        department: "",
         department: "",
         image: "",
         linkedin: "",

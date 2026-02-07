@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { User, Lock, ArrowRight, Loader2, ChevronLeft, Shield } from "lucide-react";
+import { ArrowRight, Loader2, ChevronLeft, Shield } from "lucide-react";
 import { EarthCanvas } from "@/components/ui/EarthCanvas";
 
 export default function LoginPage() {
@@ -166,9 +166,7 @@ export default function LoginPage() {
 
                     {isAdmin && (
                         <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/50 rounded-lg text-cyan-400 text-sm">
-                            <p className="font-bold mb-1">Demo Admin Credentials:</p>
-                            <p>Email: admin@ieee.org</p>
-                            <p>Password: admin123</p>
+
                         </div>
                     )}
 
@@ -190,9 +188,6 @@ export default function LoginPage() {
                         <div className="space-y-3">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-xs font-bold text-cyan-500 tracking-[0.2em] uppercase">Password</label>
-                                {!isAdmin && (
-                                    <Link href="#" className="text-xs text-white/40 hover:text-white transition-colors tracking-wide underline underline-offset-4">Forgot Password?</Link>
-                                )}
                             </div>
                             <div className="relative group">
                                 <input
@@ -222,16 +217,7 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    {!isAdmin && (
-                        <div className="mt-10 text-center border-t border-white/5 pt-8">
-                            <p className="text-white/40 text-sm">
-                                Don't have an account?{" "}
-                                <Link href="/register" className="text-cyan-400 font-bold hover:text-cyan-300 transition-colors tracking-wide">
-                                    APPLY NOW
-                                </Link>
-                            </p>
-                        </div>
-                    )}
+
                 </motion.div>
             </div>
         </div>
